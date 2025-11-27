@@ -1,0 +1,13 @@
+# Buil/d system
+Makefile.cfg
+
+# Binary
+build/
+woody_woodpacker
+
+# clangd
+.cache/
+compile_commands.json
+
+# nvim
+.nfs*

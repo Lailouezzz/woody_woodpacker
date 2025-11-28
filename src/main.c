@@ -1,9 +1,13 @@
-#include <locale.h>
-#include <stdlib.h>
-
+[[nodiscard("You mmust handle")]]
 int main(int argc, char **argv, char **envp) {
 	(void)(argc);
 	(void)(argv);
 	(void)(envp);
-	return (EXIT_FAILURE);
+	typeof(argc) i;
+
+	i = 1;
+	auto k = i;
+	++i;
+	int a = i;
+	return (k);
 }

@@ -59,12 +59,10 @@ void	perror_msg(
 	fprintf(stderr, ": %s\n", strerror(errno));
 }
 
-void	set_verbose(bool verbose)
-{
+void	set_verbose(bool verbose) {
 	_verbose = verbose;
 }
 
-void	set_pn(const char *pn)
-{
+void	set_pn(const char *pn) {
 	_pn = pn;
 }

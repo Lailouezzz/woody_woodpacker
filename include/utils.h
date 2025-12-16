@@ -83,6 +83,26 @@
 	})
 
 /**
+ * @brief Push a list to the list.
+ * @param l Pointer to the list.
+ * @param p Pointer to push elements.
+ * @param n Elem count.
+ * @return true on success, false on allocation failure.
+ */
+# define list_push_range(l, p, n) ({ \
+	(void)sizeof(*(l)->data = *(p)); \
+	bool _success = true; \
+	if ((l)->len + n > (l)->cap) { \
+		_success = list_reserve(l, stdc_bit_ceil((l)->len + n)); \
+	} \
+	if (_success) { \
+		memcpy((l)->data + (l)->len, p, (size_t)(n) * sizeof(*(l)->data)); \
+		(l)->len += n; \
+	} \
+	_success; \
+	})
+
+/**
  * @brief Iterate over list elements.
  * @param l Pointer to the list.
  * @param it Iterator variable (pointer to element).
@@ -166,5 +186,14 @@ void	set_verbose(bool verbose);
  * @param pn
  */
 void	set_pn(const char *pn);
+
+// ---
+// Static inline function
+// ---
+
+static inline size_t stdc_bit_ceil(size_t n) {
+	if (n <= 1) return 1;
+	return 1UL << (64 - __builtin_clzl(n - 1));
+}
 
 #endif

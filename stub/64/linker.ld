@@ -2,12 +2,14 @@ ENTRY(_start)
 
 SECTIONS {
 	. = 0x0;
-	stub_begin = .;
+	HIDDEN(stub_begin = .);
 	.text : {
-		*(.stub_init)
+		*(.stub.init)
 		*(.text)
 		*(.rodata*)
 		*(.data)
+		*(.bss)
+		*(.stub.data)
 	}
 	/DISCARD/ : {
 		*(.note*)

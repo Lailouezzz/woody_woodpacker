@@ -137,12 +137,12 @@ $(OBJDIR)/stub/64/%.S.o: stub/64/%.S
 
 $(OBJDIR)/stub/64/%.c.o: stub/64/%.c
 	$(call qcmd,$(MKDIR) -p $(@D))
-	$(call bcmd,cc,$<,$(CC) -c -fno-stack-protector -fPIC -ffreestanding -nostdlib $< -o $@)
+	$(call bcmd,cc,$<,$(CC) -c -fno-stack-protector -fPIC -ffreestanding -fno-plt -fvisibility=hidden -nostdlib $< -o $@)
 
 # Make the stub64 obj
 
 $(OBJDIR)/stub64.elf: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o
-	$(call bcmd,ld,$^,ld -T stub/64/linker.ld $^ -o $@ -z noexecstack)
+	$(call bcmd,ld,$^,$(LD) -nostdlib -T stub/64/linker.ld $^ -o $@ -z noexecstack)
 
 # Make the stub64.bin
 

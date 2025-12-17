@@ -139,15 +139,11 @@ $(OBJDIR)/stub/64/%.c.o: stub/64/%.c
 	$(call qcmd,$(MKDIR) -p $(@D))
 	$(call bcmd,cc,$<,$(CC) -c -fno-stack-protector -fPIC -ffreestanding -fno-plt -fvisibility=hidden -nostdlib $< -o $@)
 
-# Make the stub64 obj
-
-$(OBJDIR)/stub64.elf: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o
-	$(call bcmd,ld,$^,$(LD) -nostdlib -T stub/64/linker.ld $^ -o $@ -z noexecstack)
-
 # Make the stub64.bin
 
-$(RESDIR)/stub64.bin: $(OBJDIR)/stub64.elf
-	$(call bcmd,objcopy,$<,objcopy -O binary -j .text $< $@)
+comma := ,
+$(RESDIR)/stub64.bin: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o
+	$(call bcmd,ld,$^,$(LD) -nostdlib -Wl$(comma)--oformat=binary -T stub/64/linker.ld $^ -o $@ -z noexecstack)
 
 # Include generated dep by cc
 

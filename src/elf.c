@@ -101,7 +101,7 @@ int			elf_manager_load(
 	elf_handle.fd = open(path, O_RDWR);
 	if (elf_handle.fd < 0)
 	{
-		perror("open");
+		perror_msg("open");
 		return (EXIT_FAILURE);
 	}
 	if (_get_size(elf_handle.fd, &elf_handle.size))
@@ -118,7 +118,7 @@ int			elf_manager_load(
 	);
 	if (elf_handle.data == nullptr)
 	{
-		perror("mmap");
+		perror_msg("mmap");
 		close(elf_handle.fd);
 		return (EXIT_FAILURE);
 	}
@@ -141,14 +141,14 @@ int		elf_manager_move_pht_and_emplace_entries(
 
 	if (ftruncate64(elf_handle.fd, pht_pos + pht_new_size))
 	{
-		perror("ftruncate64");
+		perror_msg("ftruncate64");
 		return (EXIT_FAILURE);
 	}
 
 	new_data = mremap(elf_handle.data, elf_handle.size, pht_pos + pht_new_size, MREMAP_MAYMOVE);
 	if (new_data == MAP_FAILED)
 	{
-		perror("mremap");
+		perror_msg("mremap");
 		return (EXIT_FAILURE);
 	}
 	elf_handle.data = new_data;
@@ -163,10 +163,10 @@ int		elf_manager_move_pht_and_emplace_entries(
 	pht_vaddr = ALIGN_ON(elf_handle.next_available_vaddr + 1, 0x1000UL);
 	pht_vaddr += pht_pos % 0x1000;
 
-	printf("%zu\n", elf_eh_get_pht() - elf_handle.data);
-	printf("pht pos:   %8zu 0x%05lx\n", pht_pos, pht_pos);
-	printf("pht vaddr: %8zu 0x%05lx\n", pht_vaddr, pht_vaddr);
-	printf("pht memsz: %8zu 0x%05lx\n", pht_new_size, pht_new_size);
+	verbose("%zu\n", elf_eh_get_pht() - elf_handle.data);
+	verbose("pht pos:   %8zu 0x%05lx\n", pht_pos, pht_pos);
+	verbose("pht vaddr: %8zu 0x%05lx\n", pht_vaddr, pht_vaddr);
+	verbose("pht memsz: %8zu 0x%05lx\n", pht_new_size, pht_new_size);
 
 	if (phdr_index < num)
 	{
@@ -195,17 +195,17 @@ int		elf_manager_finalize(void)
 {
 	if (msync(elf_handle.data, elf_handle.size, MS_SYNC))
 	{
-		perror("msync");
+		perror_msg("msync");
 		return (EXIT_FAILURE);
 	}
 	if (munmap(elf_handle.data, elf_handle.size))
 	{
-		perror("munmap");
+		perror_msg("munmap");
 		return (EXIT_FAILURE);
 	}
 	if (close(elf_handle.fd))
 	{
-		perror("close");
+		perror_msg("close");
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);

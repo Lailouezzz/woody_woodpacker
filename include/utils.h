@@ -92,12 +92,12 @@
 # define list_push_range(l, p, n) ({ \
 	(void)sizeof(*(l)->data = *(p)); \
 	bool _success = true; \
-	if ((l)->len + n > (l)->cap) { \
-		_success = list_reserve(l, stdc_bit_ceil((l)->len + n)); \
+	if ((l)->len + (n) > (l)->cap) { \
+		_success = list_reserve(l, stdc_bit_ceil((l)->len + (n))); \
 	} \
 	if (_success) { \
 		memcpy((l)->data + (l)->len, p, (size_t)(n) * sizeof(*(l)->data)); \
-		(l)->len += n; \
+		(l)->len += (n); \
 	} \
 	_success; \
 	})

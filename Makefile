@@ -125,7 +125,29 @@ $(OBJDIR)/%.c.o: $(SRCDIR)/%.c
 
 $(OBJDIR)/%.res.o: $(RESDIR)/%
 	$(call qcmd,$(MKDIR) -p $(@D))
-	$(call bcmd,ld,$<,ld --format=binary -r $< -o $@)
+	$(call bcmd,ld,$<,ld --format=binary -r $< -o $@ -z noexecstack)
+
+# Make the stub64 asm
+
+$(OBJDIR)/stub/64/%.S.o: stub/64/%.S
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,as,$<,$(AS) $< -o $@)
+
+# Make the stub64 C
+
+$(OBJDIR)/stub/64/%.c.o: stub/64/%.c
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,cc,$<,$(CC) -c -fno-stack-protector -fPIC -ffreestanding -nostdlib $< -o $@)
+
+# Make the stub64 obj
+
+$(OBJDIR)/stub64.elf: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o
+	$(call bcmd,ld,$^,ld -T stub/64/linker.ld $^ -o $@ -z noexecstack)
+
+# Make the stub64.bin
+
+$(RESDIR)/stub64.bin: $(OBJDIR)/stub64.elf
+	$(call bcmd,objcopy,$<,objcopy -O binary -j .text $< $@)
 
 # Include generated dep by cc
 

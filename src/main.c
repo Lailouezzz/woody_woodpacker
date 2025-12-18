@@ -18,8 +18,10 @@ int	main(
 		char **envp
 		) {
 	UNUSED(envp);
-	size_t	first_entry_index;
-	int		opt;
+
+	size_t		first_entry_index;
+	int			opt;
+	t_elf_file	s;
 
 	set_pn(*argv);
 	opterr = 0;
@@ -38,14 +40,15 @@ int	main(
 	}
 	if (argc != 1)
 		print_usage();
-	if (elf_manager_load(*argv))
+	if (elf_manager_load(&s, *argv))
 		return (EXIT_FAILURE);
 
-	first_entry_index = elf_eh_get_phnum() + 1;
-	if (elf_manager_move_pht_and_emplace_entries(1))
+	first_entry_index = s.hdl.eh.get.phnum(&s) + 1;
+	if (elf_manager_move_pht_and_emplace_entries(&s, 1))
 		return (EXIT_FAILURE);
 
 	elf_append_loadable_data_and_locate(
+		&s,
 		_binary_ressources_stub64_bin_start,
 		_binary_ressources_stub64_bin_end - _binary_ressources_stub64_bin_start,
 		0x1000,
@@ -53,12 +56,14 @@ int	main(
 		PF_X | PF_R | PF_W
 	);
 
-	stub_64_data_t	*stub_data = elf_get_raw_data() + elf_ph_get_offset(first_entry_index) + elf_ph_get_memsz(first_entry_index) - sizeof(stub_64_data_t);
-	stub_data->stub_virt_off = elf_ph_get_vaddr(first_entry_index);
-	stub_data->entry_point = elf_eh_get_entry();
-	elf_eh_set_entry(elf_ph_get_vaddr(first_entry_index));
+	stub_64_data_t	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(stub_64_data_t);
+	stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
+	stub_data->entry_point = s.hdl.eh.get.entry(&s);
+	s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
 
-	if (elf_manager_finalize())
+	sizeof(s);
+
+	if (elf_manager_finalize(&s))
 		return (EXIT_FAILURE);
 
 	return (EXIT_SUCCESS);

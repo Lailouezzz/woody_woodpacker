@@ -6,7 +6,7 @@
 /*   By: Antoine Massias <massias.antoine.pro@gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 09:02:45 by amassias          #+#    #+#             */
-/*   Updated: 2025/12/17 15:58:30 by Antoine Mas      ###   ########.fr       */
+/*   Updated: 2025/12/18 13:07:20 by Antoine Mas      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,37 +119,36 @@ void		_write64_be(
 					uint64_t v
 					);
 
-uint8_t		(*read8)(const void *, size_t);
-uint16_t	(*read16)(const void *, size_t);
-uint32_t	(*read32)(const void *, size_t);
-uint64_t	(*read64)(const void *, size_t);
-void		(*write8)(void *, size_t, uint8_t);
-void		(*write16)(void *, size_t, uint16_t);
-void		(*write32)(void *, size_t, uint32_t);
-void		(*write64)(void *, size_t, uint64_t);
-
-void	int_elf_load_le_raw_io(void)
+void	int_elf_load_le_raw_io(
+			t_elf_file *s
+			)
 {
-	read8 = _read8_le;
-	read16 = _read16_le;
-	read32 = _read32_le;
-	read64 = _read64_le;
-	write8 = _write8_le;
-	write16 = _write16_le;
-	write32 = _write32_le;
-	write64 = _write64_le;
+	s->io = (t_elf_io){
+		.read8 = _read8_le,
+		.read16 = _read16_le,
+		.read32 = _read32_le,
+		.read64 = _read64_le,
+		.write8 = _write8_le,
+		.write16 = _write16_le,
+		.write32 = _write32_le,
+		.write64 = _write64_le,
+	};
 }
 
-void	int_elf_load_be_raw_io(void)
+void	int_elf_load_be_raw_io(
+			t_elf_file *s
+			)
 {
-	read8 = _read8_be;
-	read16 = _read16_be;
-	read32 = _read32_be;
-	read64 = _read64_be;
-	write8 = _write8_be;
-	write16 = _write16_be;
-	write32 = _write32_be;
-	write64 = _write64_be;
+	s->io = (t_elf_io){
+		.read8 = _read8_be,
+		.read16 = _read16_be,
+		.read32 = _read32_be,
+		.read64 = _read64_be,
+		.write8 = _write8_be,
+		.write16 = _write16_be,
+		.write32 = _write32_be,
+		.write64 = _write64_be,
+	};
 }
 
 static

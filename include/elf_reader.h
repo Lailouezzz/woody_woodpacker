@@ -6,7 +6,7 @@
 /*   By: Antoine Massias <massias.antoine.pro@gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 14:05:14 by amassias          #+#    #+#             */
-/*   Updated: 2025/12/18 11:10:01 by Antoine Mas      ###   ########.fr       */
+/*   Updated: 2025/12/18 13:17:38 by Antoine Mas      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,84 +17,128 @@
 # include <stdlib.h>
 # include <stdint.h>
 
-extern uint64_t	(*elf_eh_get_entry)(void);
+typedef struct s_elf_file	t_elf_file;
 
-extern uint64_t	(*elf_eh_get_phoff)(void);
-extern uint16_t	(*elf_eh_get_phentsize)(void);
-extern uint16_t	(*elf_eh_get_phnum)(void);
-extern void		*(*elf_eh_get_pht)();
-extern void		*(*elf_eh_get_ph)(size_t);
+typedef struct s_elf_handler
+{
+	struct
+	{
+		struct
+		{
+			uint64_t	(*entry)(t_elf_file *);
+			uint64_t	(*phoff)(t_elf_file *);
+			uint16_t	(*phentsize)(t_elf_file *);
+			uint16_t	(*phnum)(t_elf_file *);
+			uint64_t	(*shoff)(t_elf_file *);
+			uint16_t	(*shentsize)(t_elf_file *);
+			uint16_t	(*shnum)(t_elf_file *);
+			void		*(*pht)(t_elf_file *);
+			void		*(*ph)(t_elf_file *, size_t);
+			void		*(*sht)(t_elf_file *);
+			void		*(*sh)(t_elf_file *, size_t);
+		}	get;
+		struct
+		{
+			void	(*entry)(t_elf_file *, uint64_t);
+			void	(*phoff)(t_elf_file *, uint64_t);
+			void	(*phentsize)(t_elf_file *, uint16_t);
+			void	(*phnum)(t_elf_file *, uint16_t);
+			void	(*shoff)(t_elf_file *, uint64_t);
+			void	(*shentsize)(t_elf_file *, uint16_t);
+			void	(*shnum)(t_elf_file *, uint16_t);
+		}	set;
+	}	eh;
+	struct
+	{
+		struct
+		{
+			uint32_t	(*type)(t_elf_file *, size_t);
+			uint32_t	(*flags)(t_elf_file *, size_t);
+			uint64_t	(*offset)(t_elf_file *, size_t);
+			uint64_t	(*vaddr)(t_elf_file *, size_t);
+			uint64_t	(*paddr)(t_elf_file *, size_t);
+			uint64_t	(*filesz)(t_elf_file *, size_t);
+			uint64_t	(*memsz)(t_elf_file *, size_t);
+			uint64_t	(*align)(t_elf_file *, size_t);
+		}	get;
+		struct
+		{
+			void	(*type)(t_elf_file *, size_t, uint32_t);
+			void	(*flags)(t_elf_file *, size_t, uint32_t);
+			void	(*offset)(t_elf_file *, size_t, uint64_t);
+			void	(*vaddr)(t_elf_file *, size_t, uint64_t);
+			void	(*paddr)(t_elf_file *, size_t, uint64_t);
+			void	(*filesz)(t_elf_file *, size_t, uint64_t);
+			void	(*memsz)(t_elf_file *, size_t, uint64_t);
+			void	(*align)(t_elf_file *, size_t, uint64_t);
+		}	set;
+	}	ph;
+	struct
+	{
+		struct
+		{
+			uint32_t	(*name)(t_elf_file *, size_t);
+			uint32_t	(*type)(t_elf_file *, size_t);
+			uint64_t	(*flags)(t_elf_file *, size_t);
+			uint64_t	(*addr)(t_elf_file *, size_t);
+			uint64_t	(*offset)(t_elf_file *, size_t);
+			uint64_t	(*size)(t_elf_file *, size_t);
+			uint32_t	(*link)(t_elf_file *, size_t);
+			uint32_t	(*info)(t_elf_file *, size_t);
+			uint64_t	(*addralign)(t_elf_file *, size_t);
+			uint64_t	(*entsize)(t_elf_file *, size_t);
+		}	get;
+		struct
+		{
+			void	(*name)(t_elf_file *, size_t, uint32_t);
+			void	(*type)(t_elf_file *, size_t, uint32_t);
+			void	(*flags)(t_elf_file *, size_t, uint64_t);
+			void	(*addr)(t_elf_file *, size_t, uint64_t);
+			void	(*offset)(t_elf_file *, size_t, uint64_t);
+			void	(*size)(t_elf_file *, size_t, uint64_t);
+			void	(*link)(t_elf_file *, size_t, uint32_t);
+			void	(*info)(t_elf_file *, size_t, uint32_t);
+			void	(*addralign)(t_elf_file *, size_t, uint64_t);
+			void	(*entsize)(t_elf_file *, size_t, uint64_t);
+		}	set;
+	}	sh;
+}	t_elf_handler;
 
-extern void		(*elf_eh_set_entry)(uint64_t);
-extern void		(*elf_eh_set_phoff)(uint64_t);
-extern void		(*elf_eh_set_phentsize)(uint16_t);
-extern void		(*elf_eh_set_phnum)(uint16_t);
+typedef struct s_elf_io
+{
+	uint8_t		(*read8)(const void *, size_t);
+	uint16_t	(*read16)(const void *, size_t);
+	uint32_t	(*read32)(const void *, size_t);
+	uint64_t	(*read64)(const void *, size_t);
+	void		(*write8)(void *, size_t, uint8_t);
+	void		(*write16)(void *, size_t, uint16_t);
+	void		(*write32)(void *, size_t, uint32_t);
+	void		(*write64)(void *, size_t, uint64_t);
+}	t_elf_io;
 
-extern uint64_t	(*elf_eh_get_shoff)(void);
-extern uint16_t	(*elf_eh_get_shentsize)(void);
-extern uint16_t	(*elf_eh_get_shnum)(void);
-extern void		*(*elf_eh_get_sht)();
-extern void		*(*elf_eh_get_sh)(size_t);
-
-extern void		(*elf_eh_set_shoff)(uint64_t);
-extern void		(*elf_eh_set_shentsize)(uint16_t);
-extern void		(*elf_eh_set_shnum)(uint16_t);
-
-extern uint32_t	(*elf_ph_get_type)(size_t);
-extern uint32_t	(*elf_ph_get_flags)(size_t);
-extern uint64_t	(*elf_ph_get_offset)(size_t);
-extern uint64_t	(*elf_ph_get_vaddr)(size_t);
-extern uint64_t	(*elf_ph_get_paddr)(size_t);
-extern uint64_t	(*elf_ph_get_filesz)(size_t);
-extern uint64_t	(*elf_ph_get_memsz)(size_t);
-extern uint64_t	(*elf_ph_get_align)(size_t);
-
-extern void		(*elf_ph_set_type)(size_t, uint32_t);
-extern void		(*elf_ph_set_flags)(size_t, uint32_t);
-extern void		(*elf_ph_set_offset)(size_t, uint64_t);
-extern void		(*elf_ph_set_vaddr)(size_t, uint64_t);
-extern void		(*elf_ph_set_paddr)(size_t, uint64_t);
-extern void		(*elf_ph_set_filesz)(size_t, uint64_t);
-extern void		(*elf_ph_set_memsz)(size_t, uint64_t);
-extern void		(*elf_ph_set_align)(size_t, uint64_t);
-
-extern uint32_t	(*elf_sh_get_name)(size_t);
-extern uint32_t	(*elf_sh_get_type)(size_t);
-extern uint64_t	(*elf_sh_get_flags)(size_t);
-extern uint64_t	(*elf_sh_get_addr)(size_t);
-extern uint64_t	(*elf_sh_get_offset)(size_t);
-extern uint64_t	(*elf_sh_get_size)(size_t);
-extern uint32_t	(*elf_sh_get_link)(size_t);
-extern uint32_t	(*elf_sh_get_info)(size_t);
-extern uint64_t	(*elf_sh_get_addralign)(size_t);
-extern uint64_t	(*elf_sh_get_entsize)(size_t);
-
-extern void		(*elf_sh_set_name)(size_t, uint32_t);
-extern void		(*elf_sh_set_type)(size_t, uint32_t);
-extern void		(*elf_sh_set_flags)(size_t, uint64_t);
-extern void		(*elf_sh_set_addr)(size_t, uint64_t);
-extern void		(*elf_sh_set_offset)(size_t, uint64_t);
-extern void		(*elf_sh_set_size)(size_t, uint64_t);
-extern void		(*elf_sh_set_link)(size_t, uint32_t);
-extern void		(*elf_sh_set_info)(size_t, uint32_t);
-extern void		(*elf_sh_set_addralign)(size_t, uint64_t);
-extern void		(*elf_sh_set_entsize)(size_t, uint64_t);
+struct s_elf_file
+{
+	int				fd;
+	size_t			size;
+	void			*data;
+	size_t			next_available_vaddr;
+	size_t			pht_ph_load_index;
+	t_elf_handler	hdl;
+	t_elf_io		io;
+};
 
 int			elf_manager_load(
+				t_elf_file *s,
 				const char *path
 				);
 
-void		*elf_get_raw_data(void);
-
-size_t		elf_get_size(void);
-
-uint64_t	elf_get_next_vaddr(void);
-
 int			elf_manager_move_pht_and_emplace_entries(
+				t_elf_file *s,
 				size_t n
 				);
 
 int			elf_append_loadable_data_and_locate(
+				t_elf_file *s,
 				void *data,
 				size_t size,
 				size_t align,
@@ -102,6 +146,8 @@ int			elf_append_loadable_data_and_locate(
 				uint32_t flags
 				);
 
-int			elf_manager_finalize(void);
+int			elf_manager_finalize(
+				t_elf_file *s
+				);
 
 #endif

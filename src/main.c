@@ -45,17 +45,6 @@ int	main(
 	if (elf_manager_move_pht_and_emplace_entries(1))
 		return (EXIT_FAILURE);
 
-	uint64_t stub_vaddr = ALIGN_ON(elf_get_next_vaddr() + 1, 0x1000);
-	stub_vaddr += elf_get_size() % 0x1000;
-
-	stub_64_data_t	*stub_data = (void*)((uintptr_t)_binary_ressources_stub64_bin_end - sizeof(stub_64_data_t));
-	stub_data->stub_virt_off = stub_vaddr;
-	verbose("virt off 0x%llx\n", stub_data->stub_virt_off);
-	stub_data->entry_point = elf_eh_get_entry();
-	verbose("entry 0x%llx\n", stub_data->entry_point);
-
-	elf_eh_set_entry(stub_vaddr);
-
 	elf_append_loadable_data_and_locate(
 		_binary_ressources_stub64_bin_start,
 		_binary_ressources_stub64_bin_end - _binary_ressources_stub64_bin_start,
@@ -64,7 +53,10 @@ int	main(
 		PF_X | PF_R | PF_W
 	);
 
-	UNUSED(first_entry_index);
+	stub_64_data_t	*stub_data = elf_get_raw_data() + elf_ph_get_offset(first_entry_index) + elf_ph_get_memsz(first_entry_index) - sizeof(stub_64_data_t);
+	stub_data->stub_virt_off = elf_ph_get_vaddr(first_entry_index);
+	stub_data->entry_point = elf_eh_get_entry();
+	elf_eh_set_entry(elf_ph_get_vaddr(first_entry_index));
 
 	if (elf_manager_finalize())
 		return (EXIT_FAILURE);

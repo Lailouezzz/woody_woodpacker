@@ -6,7 +6,7 @@
 /*   By: Antoine Massias <massias.antoine.pro@gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 14:18:35 by amassias          #+#    #+#             */
-/*   Updated: 2025/12/17 18:07:50 by Antoine Mas      ###   ########.fr       */
+/*   Updated: 2025/12/18 11:10:11 by Antoine Mas      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,13 @@
 #include <stdio.h>
 #include <errno.h>
 
+uint64_t	(*elf_eh_get_entry)(void);
 uint64_t	(*elf_eh_get_phoff)(void);
 uint16_t	(*elf_eh_get_phentsize)(void);
 uint16_t	(*elf_eh_get_phnum)(void);
 void		*(*elf_eh_get_pht)();
 void		*(*elf_eh_get_ph)(size_t);
+void		(*elf_eh_set_entry)(uint64_t);
 void		(*elf_eh_set_phoff)(uint64_t);
 void		(*elf_eh_set_phentsize)(uint16_t);
 void		(*elf_eh_set_phnum)(uint16_t);
@@ -191,6 +193,50 @@ int		elf_manager_move_pht_and_emplace_entries(
 	return (EXIT_SUCCESS);
 }
 
+int		elf_append_loadable_data_and_locate(
+			void *data,
+			size_t size,
+			size_t align,
+			size_t ph_index,
+			uint32_t flags
+			)
+{
+	void	*new_data;
+	size_t	data_vaddr;
+
+	if (ftruncate64(elf_handle.fd, elf_handle.size + size))
+	{
+		perror_msg("ftruncate64");
+		return (EXIT_FAILURE);
+	}
+
+	new_data = mremap(elf_handle.data, elf_handle.size, elf_handle.size + size, MREMAP_MAYMOVE);
+	if (new_data == MAP_FAILED)
+	{
+		perror_msg("mremap");
+		return (EXIT_FAILURE);
+	}
+	elf_handle.data = new_data;
+
+	memcpy(&((uint8_t *)elf_handle.data)[elf_handle.size], data, size);
+
+	data_vaddr = ALIGN_ON(elf_handle.next_available_vaddr + 1, align);
+	data_vaddr += elf_handle.size % align;
+
+	elf_ph_set_type(ph_index, PT_LOAD);
+	elf_ph_set_flags(ph_index, flags);
+	elf_ph_set_offset(ph_index, elf_handle.size);
+	elf_ph_set_vaddr(ph_index, data_vaddr);
+	elf_ph_set_paddr(ph_index, data_vaddr);
+	elf_ph_set_filesz(ph_index, size);
+	elf_ph_set_memsz(ph_index, size);
+	elf_ph_set_align(ph_index, align);
+
+	elf_handle.next_available_vaddr = data_vaddr;
+	elf_handle.size += size;
+	return (EXIT_SUCCESS);
+}
+
 int		elf_manager_finalize(void)
 {
 	if (msync(elf_handle.data, elf_handle.size, MS_SYNC))
@@ -219,6 +265,11 @@ void		*elf_get_raw_data(void)
 size_t		elf_get_size(void)
 {
 	return (elf_handle.size);
+}
+
+uint64_t	elf_get_next_vaddr(void)
+{
+	return (elf_handle.next_available_vaddr);
 }
 
 static

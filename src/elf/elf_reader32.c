@@ -6,12 +6,15 @@
 /*   By: Antoine Massias <massias.antoine.pro@gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/16 09:46:23 by amassias          #+#    #+#             */
-/*   Updated: 2025/12/17 15:56:18 by Antoine Mas      ###   ########.fr       */
+/*   Updated: 2025/12/18 11:07:13 by Antoine Mas      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "int_elf_reader.h"
 # include "int_elf_offset.h"
+
+static
+uint64_t	_get_eh_entry(void);
 
 static
 uint64_t	_get_eh_phoff(void);
@@ -28,6 +31,11 @@ void		*_get_pht(void);
 static
 void		*_get_ph(
 				size_t
+				);
+
+static
+void		_set_eh_entry(
+				uint64_t entry
 				);
 
 static
@@ -277,11 +285,13 @@ void		_set_sh_entsize(
 
 void	int_elf_load_32bit_handlers(void)
 {
+	elf_eh_get_entry = _get_eh_entry;
 	elf_eh_get_phoff = _get_eh_phoff;
 	elf_eh_get_phentsize = _get_eh_phentsize;
 	elf_eh_get_phnum = _get_eh_phnum;
 	elf_eh_get_pht = _get_pht;
 	elf_eh_get_ph = _get_ph;
+	elf_eh_set_entry = _set_eh_entry;
 	elf_eh_set_phoff = _set_eh_phoff;
 	elf_eh_set_phentsize = _set_eh_phentsize;
 	elf_eh_set_phnum = _set_eh_phnum;
@@ -332,6 +342,12 @@ void	int_elf_load_32bit_handlers(void)
 }
 
 static
+uint64_t	_get_eh_entry(void)
+{
+	return (read32(elf_handle.data, ELF32_OFF__EH_ENTRY));
+}
+
+static
 uint64_t	_get_eh_phoff(void)
 {
 	return (read32(elf_handle.data, ELF32_OFF__EH_PHOFF));
@@ -368,6 +384,14 @@ void		*_get_ph(
 	const uint32_t	entsize = _get_eh_phentsize();
 
 	return ((void *)&base[off + n * entsize]);
+}
+
+static
+void		_set_eh_entry(
+				uint64_t entry
+				)
+{
+	write32(elf_handle.data, ELF32_OFF__EH_ENTRY, entry);
 }
 
 static

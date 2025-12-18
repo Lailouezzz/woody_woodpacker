@@ -6,7 +6,7 @@
 /*   By: Antoine Massias <massias.antoine.pro@gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 14:05:14 by amassias          #+#    #+#             */
-/*   Updated: 2025/12/17 17:15:35 by Antoine Mas      ###   ########.fr       */
+/*   Updated: 2025/12/18 11:10:01 by Antoine Mas      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,15 @@
 # include <stdlib.h>
 # include <stdint.h>
 
+extern uint64_t	(*elf_eh_get_entry)(void);
+
 extern uint64_t	(*elf_eh_get_phoff)(void);
 extern uint16_t	(*elf_eh_get_phentsize)(void);
 extern uint16_t	(*elf_eh_get_phnum)(void);
 extern void		*(*elf_eh_get_pht)();
 extern void		*(*elf_eh_get_ph)(size_t);
 
+extern void		(*elf_eh_set_entry)(uint64_t);
 extern void		(*elf_eh_set_phoff)(uint64_t);
 extern void		(*elf_eh_set_phentsize)(uint16_t);
 extern void		(*elf_eh_set_phnum)(uint16_t);
@@ -77,18 +80,28 @@ extern void		(*elf_sh_set_info)(size_t, uint32_t);
 extern void		(*elf_sh_set_addralign)(size_t, uint64_t);
 extern void		(*elf_sh_set_entsize)(size_t, uint64_t);
 
-int		elf_manager_load(
-			const char *path
-			);
+int			elf_manager_load(
+				const char *path
+				);
 
-void	*elf_get_raw_data(void);
+void		*elf_get_raw_data(void);
 
-size_t	elf_get_size(void);
+size_t		elf_get_size(void);
 
-int		elf_manager_move_pht_and_emplace_entries(
-			size_t n
-			);
+uint64_t	elf_get_next_vaddr(void);
 
-int		elf_manager_finalize(void);
+int			elf_manager_move_pht_and_emplace_entries(
+				size_t n
+				);
+
+int			elf_append_loadable_data_and_locate(
+				void *data,
+				size_t size,
+				size_t align,
+				size_t ph_index,
+				uint32_t flags
+				);
+
+int			elf_manager_finalize(void);
 
 #endif

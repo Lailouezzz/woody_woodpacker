@@ -32,7 +32,7 @@
  * @param T Element type.
  * @param name Type name prefix (creates name_t).
  */
-# define TYPEDEF_LIST(T, name) typedef list(T) name##_t
+# define TYPEDEF_LIST(T, name) typedef list(T) t_##name
 
 /**
  * @brief Initialize an empty list.
@@ -64,6 +64,24 @@
 	} \
 	(__tmp != NULL); \
 	})
+
+/**
+ * @brief Delete an element in the list.
+ * @param l Pointer to the list.
+ * @param v Index to delete.
+ * @return true on success, false if index out of bounds.
+ */
+# define list_delete(l, v) ({ \
+	bool __success = false; \
+	if ((v) < (l)->len) { \
+		if ((v) < (l)->len - 1) \
+			memmove(&(l)->data[v], &(l)->data[(v) + 1], \
+				((l)->len - (v) - 1) * sizeof(*(l)->data)); \
+		(l)->len--; \
+		__success = true; \
+	} \
+	__success; \
+})
 
 /**
  * @brief Push an element to the list.
@@ -108,7 +126,7 @@
  * @param it Iterator variable (pointer to element).
  */
 # define list_foreach(l, it) \
-	for (size_t _i = 0; _i < (l)->len && ((it) = &(l)->data[_i], 1); _i++)
+	for (typeof((l)->data) it = (l)->data; it < (l)->data+(l)->len; ++it)
 
 /**
  * @brief Iterate over array elements.
@@ -116,7 +134,7 @@
  * @param it Iterator variable (pointer to element).
  */
 # define array_foreach(array, it) \
-	for (size_t _i = 0; _i < ELEM_COUNT(array) && ((it) = &(array)[_i], 1); _i++)
+	for (typeof(array[0]) *it = (array); it < &(array)[ELEM_COUNT(array)]; ++it)
 
 /**
  * @brief Return the maximum of two values.
@@ -188,6 +206,13 @@ void	set_verbose(bool verbose);
  * @param pn
  */
 void	set_pn(const char *pn);
+
+void	quicksort(
+			void *tab,
+			size_t size,
+			size_t len,
+			int(*cmp)(const void*, const void*)
+			);
 
 // ---
 // Static inline function

@@ -15,32 +15,32 @@
 
 static
 uint64_t	_get_eh_entry(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 uint64_t	_get_eh_phoff(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 uint16_t	_get_eh_phentsize(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 uint16_t	_get_eh_phnum(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 void		*_get_pht(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 void		*_get_ph(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t
 				);
 
@@ -64,27 +64,27 @@ void		_set_eh_phnum(
 
 static
 uint64_t	_get_eh_shoff(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 uint16_t	_get_eh_shentsize(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 uint16_t	_get_eh_shnum(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 void		*_get_sht(
-				t_elf_file *s
+				const t_elf_file *s
 				);
 
 static
 void		*_get_sh(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t
 				);
 
@@ -114,49 +114,49 @@ void		_set_eh_shnum(
 
 static
 uint32_t	_get_ph_type(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint32_t	_get_ph_flags(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_ph_offset(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_ph_vaddr(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_ph_paddr(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_ph_filesz(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_ph_memsz(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_ph_align(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
@@ -218,61 +218,61 @@ void		_set_ph_align(
 
 static
 uint32_t	_get_sh_name(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint32_t	_get_sh_type(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_sh_flags(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_sh_addr(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_sh_offset(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_sh_size(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint32_t	_get_sh_link(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint32_t	_get_sh_info(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_sh_addralign(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
 static
 uint64_t	_get_sh_entsize(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				);
 
@@ -414,7 +414,7 @@ void	int_elf_load_32bit_handlers(
 
 static
 uint64_t	_get_eh_entry(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read32(s->data, ELF32_OFF__EH_ENTRY));
@@ -422,7 +422,7 @@ uint64_t	_get_eh_entry(
 
 static
 uint64_t	_get_eh_phoff(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read32(s->data, ELF32_OFF__EH_PHOFF));
@@ -430,7 +430,7 @@ uint64_t	_get_eh_phoff(
 
 static
 uint16_t	_get_eh_phentsize(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read16(s->data, ELF32_OFF__EH_PHENTSIZE));
@@ -438,7 +438,7 @@ uint16_t	_get_eh_phentsize(
 
 static
 uint16_t	_get_eh_phnum(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read16(s->data, ELF32_OFF__EH_PHNUM));
@@ -446,7 +446,7 @@ uint16_t	_get_eh_phnum(
 
 static
 void		*_get_pht(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	const uint8_t	*base = s->data;
@@ -457,7 +457,7 @@ void		*_get_pht(
 
 static
 void		*_get_ph(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -506,7 +506,7 @@ void		_set_eh_phnum(
 
 static
 uint64_t	_get_eh_shoff(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read32(s->data, ELF32_OFF__EH_SHOFF));
@@ -514,7 +514,7 @@ uint64_t	_get_eh_shoff(
 
 static
 uint16_t	_get_eh_shentsize(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read16(s->data, ELF32_OFF__EH_SHENTSIZE));
@@ -522,7 +522,7 @@ uint16_t	_get_eh_shentsize(
 
 static
 uint16_t	_get_eh_shnum(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	return (s->io.read16(s->data, ELF32_OFF__EH_SHNUM));
@@ -530,7 +530,7 @@ uint16_t	_get_eh_shnum(
 
 static
 void		*_get_sht(
-				t_elf_file *s
+				const t_elf_file *s
 				)
 {
 	const uint8_t	*base = s->data;
@@ -541,7 +541,7 @@ void		*_get_sht(
 
 static
 void		*_get_sh(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -581,7 +581,7 @@ void		_set_eh_shnum(
 
 static
 uint32_t	_get_ph_type(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -592,7 +592,7 @@ uint32_t	_get_ph_type(
 
 static
 uint32_t	_get_ph_flags(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -603,7 +603,7 @@ uint32_t	_get_ph_flags(
 
 static
 uint64_t	_get_ph_offset(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -614,7 +614,7 @@ uint64_t	_get_ph_offset(
 
 static
 uint64_t	_get_ph_vaddr(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -625,7 +625,7 @@ uint64_t	_get_ph_vaddr(
 
 static
 uint64_t	_get_ph_paddr(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -636,7 +636,7 @@ uint64_t	_get_ph_paddr(
 
 static
 uint64_t	_get_ph_filesz(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -647,7 +647,7 @@ uint64_t	_get_ph_filesz(
 
 static
 uint64_t	_get_ph_memsz(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -658,7 +658,7 @@ uint64_t	_get_ph_memsz(
 
 static
 uint64_t	_get_ph_align(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -765,7 +765,7 @@ void		_set_ph_align(
 
 static
 uint32_t	_get_sh_name(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -776,7 +776,7 @@ uint32_t	_get_sh_name(
 
 static
 uint32_t	_get_sh_type(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -787,7 +787,7 @@ uint32_t	_get_sh_type(
 
 static
 uint64_t	_get_sh_flags(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -798,7 +798,7 @@ uint64_t	_get_sh_flags(
 
 static
 uint64_t	_get_sh_addr(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -809,7 +809,7 @@ uint64_t	_get_sh_addr(
 
 static
 uint64_t	_get_sh_offset(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -820,7 +820,7 @@ uint64_t	_get_sh_offset(
 
 static
 uint64_t	_get_sh_size(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -831,7 +831,7 @@ uint64_t	_get_sh_size(
 
 static
 uint32_t	_get_sh_link(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -842,7 +842,7 @@ uint32_t	_get_sh_link(
 
 static
 uint32_t	_get_sh_info(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -853,7 +853,7 @@ uint32_t	_get_sh_info(
 
 static
 uint64_t	_get_sh_addralign(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {
@@ -864,7 +864,7 @@ uint64_t	_get_sh_addralign(
 
 static
 uint64_t	_get_sh_entsize(
-				t_elf_file *s,
+				const t_elf_file *s,
 				size_t n
 				)
 {

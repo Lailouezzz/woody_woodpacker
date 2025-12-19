@@ -21,7 +21,7 @@
 // ---
 
 __attribute__((section(".stub.data")))
-extern stub_64_data_t	g_stub_data;
+extern t_stub_64_data	g_stub_data;
 
 // ---
 // Function declartions

@@ -4,7 +4,7 @@
 #include "elf_reader.h"
 
 __attribute__((section(".stub.data")))
-stub_64_data_t	g_stub_data = {.entry_point = 0x4242, .stub_virt_off = 0x4242};
+t_stub_64_data	g_stub_data = {.entry_point = 0x4242, .stub_virt_off = 0x4242};
 extern char	stub_begin[];
 static char	*_base;
 

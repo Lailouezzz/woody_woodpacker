@@ -216,6 +216,48 @@ uint64_t	elf_get_next_vaddr(
 	return (s->next_available_vaddr);
 }
 
+bool		elf_vaddr_to_offset(
+				t_elf_file *s,
+				uint64_t vaddr,
+				uint64_t *off
+				) {
+	auto const	phnum = s->hdl.eh.get.phnum(s);
+
+	for (typeof_unqual(phnum) k = phnum; k != 0;) { // Reverse beceause linker is sequential
+		--k;
+		if (s->hdl.ph.get.type(s, k) == PT_LOAD) {
+			auto const	p_vaddr = s->hdl.ph.get.vaddr(s, k);
+			auto const	p_filesz = s->hdl.ph.get.memsz(s, k);
+			auto const	p_offset = s->hdl.ph.get.offset(s, k);
+			if (vaddr >= p_vaddr && vaddr < p_vaddr + p_filesz) {
+				*off = (vaddr - p_vaddr) + p_offset;
+				return (true);
+			}
+		}
+	}
+	return (false);
+}
+
+int			elf_find_ph_index(
+				const t_elf_file *s,
+				bool(*cond)(const t_elf_file *s, size_t ph_index)
+				) {
+	auto const	phnum = s->hdl.eh.get.phnum(s);
+
+	for (typeof_unqual(phnum) k = 0; k < phnum; ++k) {
+		if (cond(s, k))
+			return (k);
+	}
+	return (-1);
+}
+
+bool		elf_ph_is_dynamic(
+				const t_elf_file *s,
+				size_t ph_index
+				) {
+	return (s->hdl.ph.get.type(s, ph_index) == PT_DYNAMIC);
+}
+
 static
 int			_get_size(
 					int fd,
@@ -248,8 +290,8 @@ int			_validate_and_load(
 		return (EXIT_FAILURE);
 	switch (ehdr->e_ident[EI_CLASS])
 	{
-		case 1: int_elf_load_32bit_handlers(s); break ;
-		case 2: int_elf_load_64bit_handlers(s); break ;
+		case 1: int_elf_load_32bit_handlers(s); s->is_64 = false; break ;
+		case 2: int_elf_load_64bit_handlers(s); s->is_64 = true; break ;
 		default: return (EXIT_FAILURE);
 	}
 	switch (ehdr->e_ident[EI_DATA])

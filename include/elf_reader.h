@@ -25,17 +25,17 @@ typedef struct s_elf_handler
 	{
 		struct
 		{
-			uint64_t	(*entry)(t_elf_file *);
-			uint64_t	(*phoff)(t_elf_file *);
-			uint16_t	(*phentsize)(t_elf_file *);
-			uint16_t	(*phnum)(t_elf_file *);
-			uint64_t	(*shoff)(t_elf_file *);
-			uint16_t	(*shentsize)(t_elf_file *);
-			uint16_t	(*shnum)(t_elf_file *);
-			void		*(*pht)(t_elf_file *);
-			void		*(*ph)(t_elf_file *, size_t);
-			void		*(*sht)(t_elf_file *);
-			void		*(*sh)(t_elf_file *, size_t);
+			uint64_t	(*entry)(const t_elf_file *);
+			uint64_t	(*phoff)(const t_elf_file *);
+			uint16_t	(*phentsize)(const t_elf_file *);
+			uint16_t	(*phnum)(const t_elf_file *);
+			uint64_t	(*shoff)(const t_elf_file *);
+			uint16_t	(*shentsize)(const t_elf_file *);
+			uint16_t	(*shnum)(const t_elf_file *);
+			void		*(*pht)(const t_elf_file *);
+			void		*(*ph)(const t_elf_file *, size_t);
+			void		*(*sht)(const t_elf_file *);
+			void		*(*sh)(const t_elf_file *, size_t);
 		}	get;
 		struct
 		{
@@ -52,14 +52,14 @@ typedef struct s_elf_handler
 	{
 		struct
 		{
-			uint32_t	(*type)(t_elf_file *, size_t);
-			uint32_t	(*flags)(t_elf_file *, size_t);
-			uint64_t	(*offset)(t_elf_file *, size_t);
-			uint64_t	(*vaddr)(t_elf_file *, size_t);
-			uint64_t	(*paddr)(t_elf_file *, size_t);
-			uint64_t	(*filesz)(t_elf_file *, size_t);
-			uint64_t	(*memsz)(t_elf_file *, size_t);
-			uint64_t	(*align)(t_elf_file *, size_t);
+			uint32_t	(*type)(const t_elf_file *, size_t);
+			uint32_t	(*flags)(const t_elf_file *, size_t);
+			uint64_t	(*offset)(const t_elf_file *, size_t);
+			uint64_t	(*vaddr)(const t_elf_file *, size_t);
+			uint64_t	(*paddr)(const t_elf_file *, size_t);
+			uint64_t	(*filesz)(const t_elf_file *, size_t);
+			uint64_t	(*memsz)(const t_elf_file *, size_t);
+			uint64_t	(*align)(const t_elf_file *, size_t);
 		}	get;
 		struct
 		{
@@ -77,16 +77,16 @@ typedef struct s_elf_handler
 	{
 		struct
 		{
-			uint32_t	(*name)(t_elf_file *, size_t);
-			uint32_t	(*type)(t_elf_file *, size_t);
-			uint64_t	(*flags)(t_elf_file *, size_t);
-			uint64_t	(*addr)(t_elf_file *, size_t);
-			uint64_t	(*offset)(t_elf_file *, size_t);
-			uint64_t	(*size)(t_elf_file *, size_t);
-			uint32_t	(*link)(t_elf_file *, size_t);
-			uint32_t	(*info)(t_elf_file *, size_t);
-			uint64_t	(*addralign)(t_elf_file *, size_t);
-			uint64_t	(*entsize)(t_elf_file *, size_t);
+			uint32_t	(*name)(const t_elf_file *, size_t);
+			uint32_t	(*type)(const t_elf_file *, size_t);
+			uint64_t	(*flags)(const t_elf_file *, size_t);
+			uint64_t	(*addr)(const t_elf_file *, size_t);
+			uint64_t	(*offset)(const t_elf_file *, size_t);
+			uint64_t	(*size)(const t_elf_file *, size_t);
+			uint32_t	(*link)(const t_elf_file *, size_t);
+			uint32_t	(*info)(const t_elf_file *, size_t);
+			uint64_t	(*addralign)(const t_elf_file *, size_t);
+			uint64_t	(*entsize)(const t_elf_file *, size_t);
 		}	get;
 		struct
 		{
@@ -125,6 +125,7 @@ struct s_elf_file
 	size_t			pht_ph_load_index;
 	t_elf_handler	hdl;
 	t_elf_io		io;
+	bool			is_64;
 };
 
 int			elf_manager_load(
@@ -144,6 +145,22 @@ int			elf_append_loadable_data_and_locate(
 				size_t align,
 				size_t ph_index,
 				uint32_t flags
+				);
+
+bool		elf_vaddr_to_offset(
+				t_elf_file *s,
+				uint64_t vaddr,
+				uint64_t *off
+				);
+
+int			elf_find_ph_index(
+				const t_elf_file *s,
+				bool(*cond)(const t_elf_file *elf, size_t ph_index)
+				);
+
+bool		elf_ph_is_dynamic(
+				const t_elf_file *s,
+				size_t ph_index
 				);
 
 int			elf_manager_finalize(

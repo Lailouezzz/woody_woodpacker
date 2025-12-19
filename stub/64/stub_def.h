@@ -20,7 +20,7 @@
 typedef struct __attribute__((packed)) {
 	uint64_t	stub_virt_off;
 	uint64_t	entry_point;
-}	stub_64_data_t;
+}	t_stub_64_data;
 
 // ---
 // Function declartions

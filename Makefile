@@ -135,14 +135,21 @@ $(OBJDIR)/stub/64/%.S.o: stub/64/%.S
 
 # Make the stub64 C
 
+$(OBJDIR)/stub/64/%.c.o: $(SRCDIR)/%.c
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB64) -I$(INCDIR) -c $< -o $@)
+
 $(OBJDIR)/stub/64/%.c.o: stub/64/%.c
 	$(call qcmd,$(MKDIR) -p $(@D))
-	$(call bcmd,cc,$<,$(CC) -c -fno-stack-protector -fPIC -ffreestanding -fno-plt -fvisibility=hidden -nostdlib $< -o $@)
+	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB64) -I$(INCDIR) -c $< -o $@)
 
-# Make the stub64.bin
+# Make the stub64.biin
+
+$(OBJDIR)/stub64.o: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o $(OBJDIR)/stub/64/elf/elf_reader32.c.o $(OBJDIR)/stub/64/elf/elf_reader64.c.o $(OBJDIR)/stub/64/elf.c.o $(OBJDIR)/stub/64/strings.c.o $(OBJDIR)/stub/64/elf/raw_data_rw.c.o $(OBJDIR)/stub/64/syscall.c.o
+	$(call bcmd,ld,$^,$(LD) -nostdlib -r -o $@ $^ -z noexecstack)
 
 comma := ,
-$(RESDIR)/stub64.bin: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o
+$(RESDIR)/stub64.bin: $(OBJDIR)/stub64.o
 	$(call bcmd,ld,$^,$(LD) -nostdlib -Wl$(comma)--oformat=binary -T stub/64/linker.ld $^ -o $@ -z noexecstack)
 
 # Include generated dep by cc

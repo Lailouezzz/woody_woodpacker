@@ -123,32 +123,28 @@ void	int_elf_load_le_raw_io(
 			t_elf_file *s
 			)
 {
-	s->io = (t_elf_io){
-		.read8 = _read8_le,
-		.read16 = _read16_le,
-		.read32 = _read32_le,
-		.read64 = _read64_le,
-		.write8 = _write8_le,
-		.write16 = _write16_le,
-		.write32 = _write32_le,
-		.write64 = _write64_le,
-	};
+	s->io.read8 = _read8_le;
+	s->io.read16 = _read16_le;
+	s->io.read32 = _read32_le;
+	s->io.read64 = _read64_le;
+	s->io.write8 = _write8_le;
+	s->io.write16 = _write16_le;
+	s->io.write32 = _write32_le;
+	s->io.write64 = _write64_le;
 }
 
 void	int_elf_load_be_raw_io(
 			t_elf_file *s
 			)
 {
-	s->io = (t_elf_io){
-		.read8 = _read8_be,
-		.read16 = _read16_be,
-		.read32 = _read32_be,
-		.read64 = _read64_be,
-		.write8 = _write8_be,
-		.write16 = _write16_be,
-		.write32 = _write32_be,
-		.write64 = _write64_be,
-	};
+	s->io.read8 = _read8_be;
+	s->io.read16 = _read16_be;
+	s->io.read32 = _read32_be;
+	s->io.read64 = _read64_be;
+	s->io.write8 = _write8_be;
+	s->io.write16 = _write16_be;
+	s->io.write32 = _write32_be;
+	s->io.write64 = _write64_be;
 }
 
 static

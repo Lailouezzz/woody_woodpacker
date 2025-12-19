@@ -350,80 +350,66 @@ void	int_elf_load_32bit_handlers(
 			t_elf_file *s
 			)
 {
-	s->hdl = (t_elf_handler){
-		.eh = {
-			.get = {
-				.entry = _get_eh_entry,
-				.phoff = _get_eh_phoff,
-				.phentsize = _get_eh_phentsize,
-				.phnum = _get_eh_phnum,
-				.shoff = _get_eh_shoff,
-				.shentsize = _get_eh_shentsize,
-				.shnum = _get_eh_shnum,
-				.pht = _get_pht,
-				.ph = _get_ph,
-				.sht = _get_sht,
-				.sh = _get_sh,
-			},
-			.set = {
-				.entry = _set_eh_entry,
-				.phoff = _set_eh_phoff,
-				.phentsize = _set_eh_phentsize,
-				.phnum = _set_eh_phnum,
-				.shoff = _set_eh_shoff,
-				.shentsize = _set_eh_shentsize,
-				.shnum = _set_eh_shnum,
-			},
-		},
-		.ph = {
-			.get = {
-				.type = _get_ph_type,
-				.flags = _get_ph_flags,
-				.offset = _get_ph_offset,
-				.vaddr = _get_ph_vaddr,
-				.paddr = _get_ph_paddr,
-				.filesz = _get_ph_filesz,
-				.memsz = _get_ph_memsz,
-				.align = _get_ph_align,
-			},
-			.set = {
-				.type = _set_ph_type,
-				.flags = _set_ph_flags,
-				.offset = _set_ph_offset,
-				.vaddr = _set_ph_vaddr,
-				.paddr = _set_ph_paddr,
-				.filesz = _set_ph_filesz,
-				.memsz = _set_ph_memsz,
-				.align = _set_ph_align,
-			},
-		},
-		.sh = {
-			.get = {
-				.name = _get_sh_name,
-				.type = _get_sh_type,
-				.flags = _get_sh_flags,
-				.addr = _get_sh_addr,
-				.offset = _get_sh_offset,
-				.size = _get_sh_size,
-				.link = _get_sh_link,
-				.info = _get_sh_info,
-				.addralign = _get_sh_addralign,
-				.entsize = _get_sh_entsize,
-			},
-			.set = {
-				.name = _set_sh_name,
-				.type = _set_sh_type,
-				.flags = _set_sh_flags,
-				.addr = _set_sh_addr,
-				.offset = _set_sh_offset,
-				.size = _set_sh_size,
-				.link = _set_sh_link,
-				.info = _set_sh_info,
-				.addralign = _set_sh_addralign,
-				.entsize = _set_sh_entsize,
-			},
-		},
-	};
+	// eh getters
+	s->hdl.eh.get.entry = _get_eh_entry;
+	s->hdl.eh.get.phoff = _get_eh_phoff;
+	s->hdl.eh.get.phentsize = _get_eh_phentsize;
+	s->hdl.eh.get.phnum = _get_eh_phnum;
+	s->hdl.eh.get.shoff = _get_eh_shoff;
+	s->hdl.eh.get.shentsize = _get_eh_shentsize;
+	s->hdl.eh.get.shnum = _get_eh_shnum;
+	s->hdl.eh.get.pht = _get_pht;
+	s->hdl.eh.get.ph = _get_ph;
+	s->hdl.eh.get.sht = _get_sht;
+	s->hdl.eh.get.sh = _get_sh;
+	// eh setters
+	s->hdl.eh.set.entry = _set_eh_entry;
+	s->hdl.eh.set.phoff = _set_eh_phoff;
+	s->hdl.eh.set.phentsize = _set_eh_phentsize;
+	s->hdl.eh.set.phnum = _set_eh_phnum;
+	s->hdl.eh.set.shoff = _set_eh_shoff;
+	s->hdl.eh.set.shentsize = _set_eh_shentsize;
+	s->hdl.eh.set.shnum = _set_eh_shnum;
+	// ph getters
+	s->hdl.ph.get.type = _get_ph_type;
+	s->hdl.ph.get.flags = _get_ph_flags;
+	s->hdl.ph.get.offset = _get_ph_offset;
+	s->hdl.ph.get.vaddr = _get_ph_vaddr;
+	s->hdl.ph.get.paddr = _get_ph_paddr;
+	s->hdl.ph.get.filesz = _get_ph_filesz;
+	s->hdl.ph.get.memsz = _get_ph_memsz;
+	s->hdl.ph.get.align = _get_ph_align;
+	// ph setters
+	s->hdl.ph.set.type = _set_ph_type;
+	s->hdl.ph.set.flags = _set_ph_flags;
+	s->hdl.ph.set.offset = _set_ph_offset;
+	s->hdl.ph.set.vaddr = _set_ph_vaddr;
+	s->hdl.ph.set.paddr = _set_ph_paddr;
+	s->hdl.ph.set.filesz = _set_ph_filesz;
+	s->hdl.ph.set.memsz = _set_ph_memsz;
+	s->hdl.ph.set.align = _set_ph_align;
+	// sh getters
+	s->hdl.sh.get.name = _get_sh_name;
+	s->hdl.sh.get.type = _get_sh_type;
+	s->hdl.sh.get.flags = _get_sh_flags;
+	s->hdl.sh.get.addr = _get_sh_addr;
+	s->hdl.sh.get.offset = _get_sh_offset;
+	s->hdl.sh.get.size = _get_sh_size;
+	s->hdl.sh.get.link = _get_sh_link;
+	s->hdl.sh.get.info = _get_sh_info;
+	s->hdl.sh.get.addralign = _get_sh_addralign;
+	s->hdl.sh.get.entsize = _get_sh_entsize;
+	// sh setters
+	s->hdl.sh.set.name = _set_sh_name;
+	s->hdl.sh.set.type = _set_sh_type;
+	s->hdl.sh.set.flags = _set_sh_flags;
+	s->hdl.sh.set.addr = _set_sh_addr;
+	s->hdl.sh.set.offset = _set_sh_offset;
+	s->hdl.sh.set.size = _set_sh_size;
+	s->hdl.sh.set.link = _set_sh_link;
+	s->hdl.sh.set.info = _set_sh_info;
+	s->hdl.sh.set.addralign = _set_sh_addralign;
+	s->hdl.sh.set.entsize = _set_sh_entsize;
 }
 
 static

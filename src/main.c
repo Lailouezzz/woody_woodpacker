@@ -57,11 +57,12 @@ int	main(
 	);
 
 	stub_64_data_t	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(stub_64_data_t);
+	printf("VIRT OFF = %p\n", (void*)stub_data->stub_virt_off);
 	stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
+	printf("ENTRY = %p\n", (void*)stub_data->entry_point);
 	stub_data->entry_point = s.hdl.eh.get.entry(&s);
 	s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
 
-	sizeof(s);
 
 	if (elf_manager_finalize(&s))
 		return (EXIT_FAILURE);

@@ -15,7 +15,7 @@ _start:
 	mov rax, 1
 	mov rdi, 1
 	lea rsi, [rip + msg]
-	mov rdx, 14
+	mov rdx, 12
 	syscall
 
 	pop rax

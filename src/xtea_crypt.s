@@ -239,6 +239,18 @@
 	paddd			xmm14,	xmm11									# v1s += ((v0s << 4) ^ (v0s >> 5) + v0s) ^ (key + data)
 .endm
 
+test_sse1_sse2:
+	push		rbx
+	push		rcx
+	push		rdx
+	mov			eax, 0x01
+	cpuid
+	mov			eax, edx
+	pop			rdx
+	pop			rcx
+	pop			rbx
+	ret
+
 xtea_encrypt:
 	cmp			rsi, 8
 	jb			.xtea_encrypt_exit
@@ -250,6 +262,11 @@ xtea_encrypt:
 	shr			r8, 3
 	cmp			rsi, 32
 	jb			.xtea_encrypt_prepare
+
+	call		test_sse
+	test		eax, ~(0b11<<25)
+	je			.xtea_encrypt_prepare
+
 	and			rsi, -8
 	add			rsi, rdi
 	lea			rax, [rdx + 16]
@@ -478,6 +495,11 @@ xtea_decrypt:
 	shr			r8, 3
 	cmp			rsi, 32
 	jb			.xtea_decrypt_prepare
+
+	call		test_sse
+	test		eax, ~(0b11<<25)
+	je			.xtea_decrypt_prepare
+
 	and			rsi, -8
 	add			rsi, rdi
 	lea			rax, [rdx + 16]

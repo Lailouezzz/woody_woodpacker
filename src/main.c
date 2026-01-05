@@ -70,7 +70,7 @@ int	main(
 	s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
 
 
-	if (elf_manager_finalize(&s))
+	if (elf_manager_finalize(&s, "woody"))
 		return (EXIT_FAILURE);
 
 	return (EXIT_SUCCESS);

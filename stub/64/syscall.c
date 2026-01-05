@@ -17,6 +17,7 @@
 #define SYS_WRITE 1
 #define SYS_OPEN 2
 #define SYS_CLOSE 3
+#define SYS_FSTAT 5
 #define SYS_LSEEK 8
 #define SYS_MMAP 9
 #define SYS_MUNMAP 11
@@ -92,12 +93,8 @@ int	mremap(void *old_addr, size_t old_size, size_t new_size, int flags, ...) {
 	return syscall4(SYS_MREMAP, (long)old_addr, old_size, new_size, flags);
 }
 
-int	ftruncate(int fd, off_t len) {
-	return syscall2(SYS_FTRUNCATE, fd, len);
-}
-
-int	ftruncate64(int fd, off_t len) {
-	return syscall2(SYS_FTRUNCATE, fd, len);
+int	fstat(int fd, struct stat *st) {
+	return syscall2(SYS_FSTAT, fd, (long)st);
 }
 
 // ---

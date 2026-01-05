@@ -17,7 +17,7 @@ static void _inject_other() {
 	if (elf_manager_move_pht_and_emplace_entries(&elf, 0))
 		return ;
 	write(STDOUT_FILENO, "FINALIZING\n", 11);
-	if (elf_manager_finalize(&elf))
+	if (elf_manager_finalize(&elf, "woody"))
 		return ;
 }
 

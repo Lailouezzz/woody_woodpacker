@@ -118,7 +118,6 @@ typedef struct s_elf_io
 
 struct s_elf_file
 {
-	int				fd;
 	size_t			size;
 	void			*data;
 	size_t			next_available_vaddr;
@@ -164,7 +163,8 @@ bool		elf_ph_is_dynamic(
 				);
 
 int			elf_manager_finalize(
-				t_elf_file *s
+				t_elf_file *s,
+				const char *path
 				);
 
 #endif

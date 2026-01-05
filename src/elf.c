@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 static
 int			_get_size(
@@ -47,28 +48,28 @@ int			elf_manager_load(
 				const char *path
 				)
 {
-	s->fd = open(path, O_RDWR);
-	if (s->fd < 0)
+	int	fd;
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
 	{
 		return (EXIT_FAILURE);
 	}
-	if (_get_size(s->fd, &s->size))
+	if (_get_size(fd, &s->size))
 	{
-		close(s->fd);
+		close(fd);
 		return (EXIT_FAILURE);
 	}
 	s->data = mmap(NULL,
 		s->size,
 		PROT_READ | PROT_WRITE,
-		MAP_SHARED,
-		s->fd,
+		MAP_PRIVATE,
+		fd,
 		0
 	);
+	close(fd);
 	if (s->data == nullptr)
-	{
-		close(s->fd);
 		return (EXIT_FAILURE);
-	}
 	if (_validate_and_load(s))
 		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
@@ -87,16 +88,9 @@ int		elf_manager_move_pht_and_emplace_entries(
 	size_t			pht_vaddr;
 	void			*new_data;
 
-	if (ftruncate64(s->fd, pht_pos + pht_new_size))
-	{
-		return (EXIT_FAILURE);
-	}
-
 	new_data = mremap(s->data, s->size, pht_pos + pht_new_size, MREMAP_MAYMOVE);
 	if (new_data == MAP_FAILED)
-	{
 		return (EXIT_FAILURE);
-	}
 	s->data = new_data;
 	s->pht_ph_load_index = num;
 
@@ -145,16 +139,9 @@ int		elf_append_loadable_data_and_locate(
 	void	*new_data;
 	size_t	data_vaddr;
 
-	if (ftruncate64(s->fd, s->size + size))
-	{
-		return (EXIT_FAILURE);
-	}
-
 	new_data = mremap(s->data, s->size, s->size + size, MREMAP_MAYMOVE);
 	if (new_data == MAP_FAILED)
-	{
 		return (EXIT_FAILURE);
-	}
 	s->data = new_data;
 
 	memcpy(&((uint8_t *)s->data)[s->size], data, size);
@@ -177,21 +164,22 @@ int		elf_append_loadable_data_and_locate(
 }
 
 int		elf_manager_finalize(
-			t_elf_file *s
+			t_elf_file *s,
+			const char *path
 			)
 {
-	if (msync(s->data, s->size, MS_SYNC))
-	{
+	int	r;
+	int	fd;
+
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd < 0)
 		return (EXIT_FAILURE);
-	}
+	r = write(fd, s->data, s->size);
+	close(fd);
+	if (r < 0 || r != (ssize_t)s->size)
+		return (EXIT_FAILURE);
 	if (munmap(s->data, s->size))
-	{
 		return (EXIT_FAILURE);
-	}
-	if (close(s->fd))
-	{
-		return (EXIT_FAILURE);
-	}
 	return (EXIT_SUCCESS);
 }
 
@@ -264,15 +252,11 @@ int			_get_size(
 					size_t *size
 					)
 {
-	off_t	len;
+	struct stat	st;
 
-	len = lseek(fd, 0, SEEK_END);
-	if (len < 0)
+	if (fstat(fd, &st) != 0)
 		return (EXIT_FAILURE);
-	*size = len;
-	len = lseek(fd, 0, SEEK_SET);
-	if (len < 0)
-		return (EXIT_FAILURE);
+	*size = st.st_size;
 	return (EXIT_SUCCESS);
 }
 

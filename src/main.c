@@ -51,7 +51,7 @@ int	main(
 	t_ranges	ranges = list_new();
 	if (elf_get_protected_ranges(&s, &ranges)) {
 		list_foreach(&ranges, it) {
-			printf("PROTECTED RANGE :\nOFF : 0x%lx\nLEN : 0x%zx\n", it->off, it->len);
+			verbose("PROTECTED RANGE :\nOFF : 0x%lx\nLEN : 0x%zx\n", it->off, it->len);
 		}
 	}
 

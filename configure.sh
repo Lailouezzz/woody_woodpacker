@@ -13,6 +13,7 @@ objdir=build
 outdir=.
 cflags=
 ldflags=
+arch=64
 
 # ---
 # Help message
@@ -30,6 +31,7 @@ Build options:
   --optimize-disable       disable optimization
   --objdir=OBJDIR          directory for all object (default: ./build)
   --outdir=OUTDIR          directory for all output executable (default : ./bin)
+  --arch=ARCH              build architecture (default: 64)
 Other tweaks:
   CFLAGS=CFLAGS            some more compilation flags
   LDFLAGS=LDFLAGS          some more linker flags
@@ -59,6 +61,7 @@ for arg ; do case "$arg" in
 --outdir=*) outdir="${arg#*=}" ;;
 --cflags=*) cflags="${arg#*=}" ;;
 --ldflags=*) ldflags="${arg#*=}" ;;
+--arch=*) arch="${arg#*=}" ;;
 *) echo "Unknown option: ${arg#*=}";exit 1 ;;
 esac; done
 
@@ -87,6 +90,7 @@ OBJDIR := $objdir
 OUTDIR := $outdir
 # Other tweaks
 CMOREFLAGS := $cflags
+ARCH := $arch
 LDMOREFLAGS := $ldflags
 # End of file
 EOF

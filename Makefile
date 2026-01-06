@@ -125,7 +125,7 @@ $(OBJDIR)/%.c.o: $(SRCDIR)/%.c
 
 $(OBJDIR)/%.res.o: $(RESDIR)/%
 	$(call qcmd,$(MKDIR) -p $(@D))
-	$(call bcmd,ld,$<,ld --format=binary -r $< -o $@ -z noexecstack)
+	$(call bcmd,ld,$<,ld -m $(LD_EMUL) --format=binary -r $< -o $@ -z noexecstack)
 
 # Make the stub64 asm
 

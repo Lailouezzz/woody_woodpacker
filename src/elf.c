@@ -48,7 +48,8 @@ int			elf_manager_load(
 				const char *path
 				)
 {
-	int	fd;
+	int		fd;
+	void	*src;
 
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
@@ -60,7 +61,7 @@ int			elf_manager_load(
 		close(fd);
 		return (EXIT_FAILURE);
 	}
-	s->data = mmap(NULL,
+	src = mmap(NULL,
 		s->size,
 		PROT_READ | PROT_WRITE,
 		MAP_PRIVATE,
@@ -68,7 +69,18 @@ int			elf_manager_load(
 		0
 	);
 	close(fd);
-	if (s->data == nullptr)
+	if (src == MAP_FAILED)
+		return (EXIT_FAILURE);
+	s->data = mmap(NULL,
+		s->size,
+		PROT_READ | PROT_WRITE,
+		MAP_PRIVATE | MAP_ANONYMOUS,
+		-1,
+		0);
+	if (s->data == MAP_FAILED)
+		return (EXIT_FAILURE);
+	memcpy(s->data, src, s->size);
+	if (munmap(src, s->size))
 		return (EXIT_FAILURE);
 	if (_validate_and_load(s))
 		return (EXIT_FAILURE);
@@ -171,7 +183,7 @@ int		elf_manager_finalize(
 	int	r;
 	int	fd;
 
-	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0755);
 	if (fd < 0)
 		return (EXIT_FAILURE);
 	r = write(fd, s->data, s->size);

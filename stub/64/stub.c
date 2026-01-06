@@ -21,10 +21,6 @@ static void _inject_other() {
 		return ;
 }
 
-void (*get_truc())() {
-	return _inject_other;
-}
-
 void *stub_main(void) {
 	_base = (char*)stub_begin - g_stub_data.stub_virt_off;
 	_inject_other();

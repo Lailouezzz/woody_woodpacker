@@ -6,12 +6,15 @@
 #include "elf_reader.h"
 #include "protect_range.h"
 #include "utils.h"
+#include "stub/32/stub_def.h"
 #include "stub/64/stub_def.h"
 
 static noreturn void	print_usage();
 
 extern char _binary_ressources_stub64_bin_start[];
 extern char _binary_ressources_stub64_bin_end[];
+extern char _binary_ressources_stub32_bin_start[];
+extern char _binary_ressources_stub32_bin_end[];
 
 int	main(
 		int argc,
@@ -55,20 +58,35 @@ int	main(
 		}
 	}
 
-	elf_append_loadable_data_and_locate(
-		&s,
-		_binary_ressources_stub64_bin_start,
-		_binary_ressources_stub64_bin_end - _binary_ressources_stub64_bin_start,
-		0x1000,
-		first_entry_index,
-		PF_X | PF_R | PF_W
-	);
+	if (s.is_64) {
+		elf_append_loadable_data_and_locate(
+			&s,
+			_binary_ressources_stub64_bin_start,
+			_binary_ressources_stub64_bin_end - _binary_ressources_stub64_bin_start,
+			0x1000,
+			first_entry_index,
+			PF_X | PF_R | PF_W
+		);
 
-	t_stub_64_data	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(t_stub_64_data);
-	stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
-	stub_data->entry_point = s.hdl.eh.get.entry(&s);
-	s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
+		t_stub_64_data	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(t_stub_64_data);
+		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
+		stub_data->entry_point = s.hdl.eh.get.entry(&s);
+		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
+	} else {
+		elf_append_loadable_data_and_locate(
+			&s,
+			_binary_ressources_stub32_bin_start,
+			_binary_ressources_stub32_bin_end - _binary_ressources_stub32_bin_start,
+			0x1000,
+			first_entry_index,
+			PF_X | PF_R | PF_W
+		);
 
+		t_stub_32_data	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(t_stub_32_data);
+		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
+		stub_data->entry_point = s.hdl.eh.get.entry(&s);
+		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
+	}
 
 	if (elf_manager_finalize(&s, "woody"))
 		return (EXIT_FAILURE);

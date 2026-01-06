@@ -121,6 +121,18 @@ $(OBJDIR)/%.c.o: $(SRCDIR)/%.c
 	$(call qcmd,$(MKDIR) -p $(@D))
 	$(call bcmd,cc,$<,$(CC) -c $(CFLAGS) -o $@ $<)
 
+# Make xtea 64
+
+$(OBJDIR)/xtea_crypt_64.S.o: stub/64/xtea_crypt_64.S
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,as,$<,$(AS) $(ASFLAGS) $< -o $@)
+
+# Make xtea 32
+
+$(OBJDIR)/xtea_crypt_32.S.o: stub/32/xtea_crypt_32.S
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,as,$<,$(AS) $(ASFLAGS) $< -o $@)
+
 # Make object ressources
 
 $(OBJDIR)/%.res.o: $(RESDIR)/%
@@ -151,6 +163,31 @@ $(OBJDIR)/stub64.o: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o $(OBJD
 comma := ,
 $(RESDIR)/stub64.bin: $(OBJDIR)/stub64.o
 	$(call bcmd,ld,$^,$(LD) -nostdlib -Wl$(comma)--oformat=binary -T stub/64/linker.ld $^ -o $@ -z noexecstack)
+
+# Make the stub32 asm
+
+$(OBJDIR)/stub/32/%.S.o: stub/32/%.S
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,as,$<,$(AS) --32 $< -o $@)
+
+# Make the stub32 C
+
+$(OBJDIR)/stub/32/%.c.o: $(SRCDIR)/%.c
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB32) -I$(INCDIR) -c $< -o $@)
+
+$(OBJDIR)/stub/32/%.c.o: stub/32/%.c
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB32) -I$(INCDIR) -c $< -o $@)
+
+# Make the stub32.biin
+
+$(OBJDIR)/stub32.o: $(OBJDIR)/stub/32/stub.S.o $(OBJDIR)/stub/32/stub.c.o $(OBJDIR)/stub/32/elf/elf_reader32.c.o $(OBJDIR)/stub/32/elf/elf_reader64.c.o $(OBJDIR)/stub/32/elf.c.o $(OBJDIR)/stub/32/strings.c.o $(OBJDIR)/stub/32/elf/raw_data_rw.c.o $(OBJDIR)/stub/32/syscall.c.o
+	$(call bcmd,ld,$^,$(LD) -nostdlib -m32 -r -o $@ $^ -z noexecstack)
+
+comma := ,
+$(RESDIR)/stub32.bin: $(OBJDIR)/stub32.o
+	$(call bcmd,ld,$^,$(LD) -nostdlib -m32 -Wl$(comma)--oformat=binary -T stub/32/linker.ld $^ -o $@ -z noexecstack)
 
 # Include generated dep by cc
 

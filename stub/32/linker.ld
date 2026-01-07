@@ -10,6 +10,9 @@ SECTIONS {
 		*(.rodata*)
 		*(.data)
 		*(.data.rel*)
+		. = ALIGN(4);
+		*(.got.plt)
+		*(.got)
 		*(.bss)
 		. = ALIGN(8);
 		*(.stub.data)
@@ -23,7 +26,6 @@ SECTIONS {
 		*(.eh_frame*)
 		*(.plt*)
 		*(.rela*)
-		*(.got*)
 		*(.dynsym)
 		*(.dynstr)
 		*(.hash)

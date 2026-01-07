@@ -185,9 +185,11 @@ $(OBJDIR)/stub/32/%.c.o: stub/32/%.c
 $(OBJDIR)/stub32.o: $(OBJDIR)/stub/32/stub.S.o $(OBJDIR)/stub/32/stub.c.o $(OBJDIR)/stub/32/elf/elf_reader32.c.o $(OBJDIR)/stub/32/elf/elf_reader64.c.o $(OBJDIR)/stub/32/elf.c.o $(OBJDIR)/stub/32/strings.c.o $(OBJDIR)/stub/32/elf/raw_data_rw.c.o $(OBJDIR)/stub/32/syscall.c.o
 	$(call bcmd,ld,$^,$(LD) -nostdlib -m32 -r -o $@ $^ -z noexecstack)
 
-comma := ,
-$(RESDIR)/stub32.bin: $(OBJDIR)/stub32.o
-	$(call bcmd,ld,$^,$(LD) -nostdlib -m32 -Wl$(comma)--oformat=binary -T stub/32/linker.ld $^ -o $@ -z noexecstack)
+$(OBJDIR)/stub32.elf: $(OBJDIR)/stub32.o
+	$(call bcmd,ld,$^,$(LD) -nostdlib -m32 -T stub/32/linker.ld $^ -o $@ -z noexecstack)
+
+$(RESDIR)/stub32.bin: $(OBJDIR)/stub32.elf
+	$(call bcmd,objcopy,$^,objcopy -O binary $^ $@)
 
 # Include generated dep by cc
 

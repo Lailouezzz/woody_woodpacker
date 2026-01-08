@@ -25,6 +25,11 @@ uint64_t	_get_eh_phoff(
 				);
 
 static
+uint16_t	_get_eh_shstrndx(
+				const t_elf_file *s
+				);
+
+static
 uint16_t	_get_eh_phentsize(
 				const t_elf_file *s
 				);
@@ -49,6 +54,12 @@ static
 void		_set_eh_phoff(
 				t_elf_file *s,
 				uint64_t off
+				);
+
+static
+void		_set_eh_shstrndx(
+				t_elf_file *s,
+				uint16_t shstrndx
 				);
 
 static
@@ -355,6 +366,7 @@ void	int_elf_load_64bit_handlers(
 	s->hdl.eh.get.entry = _get_eh_entry;
 	s->hdl.eh.get.phoff = _get_eh_phoff;
 	s->hdl.eh.get.phentsize = _get_eh_phentsize;
+	s->hdl.eh.get.shstrndx = _get_eh_shstrndx;
 	s->hdl.eh.get.phnum = _get_eh_phnum;
 	s->hdl.eh.get.shoff = _get_eh_shoff;
 	s->hdl.eh.get.shentsize = _get_eh_shentsize;
@@ -366,6 +378,7 @@ void	int_elf_load_64bit_handlers(
 	// eh setters
 	s->hdl.eh.set.entry = _set_eh_entry;
 	s->hdl.eh.set.phoff = _set_eh_phoff;
+	s->hdl.eh.set.shstrndx = _set_eh_shstrndx;
 	s->hdl.eh.set.phentsize = _set_eh_phentsize;
 	s->hdl.eh.set.phnum = _set_eh_phnum;
 	s->hdl.eh.set.shoff = _set_eh_shoff;
@@ -430,6 +443,14 @@ uint64_t	_get_eh_phoff(
 }
 
 static
+uint16_t	_get_eh_shstrndx(
+				const t_elf_file *s
+				)
+{
+	return (s->io.read16(s->data, ELF64_OFF__EH_SHSTRNDX));
+}
+
+static
 uint16_t	_get_eh_phentsize(
 				const t_elf_file *s
 				)
@@ -485,6 +506,15 @@ void		_set_eh_phoff(
 				)
 {
 	s->io.write64(s->data, ELF64_OFF__EH_PHOFF, off);
+}
+
+static
+void		_set_eh_shstrndx(
+				t_elf_file *s,
+				uint16_t shstrndx
+				)
+{
+	s->io.write16(s->data, ELF64_OFF__EH_SHSTRNDX, shstrndx);
 }
 
 static

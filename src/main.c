@@ -52,11 +52,6 @@ int	main(
 		return (EXIT_FAILURE);
 
 	t_ranges	ranges = list_new();
-	if (elf_get_protected_ranges(&s, &ranges)) {
-		list_foreach(&ranges, it) {
-			verbose("PROTECTED RANGE :\nOFF : 0x%lx\nLEN : 0x%zx\n", it->off, it->len);
-		}
-	}
 
 	if (s.is_64) {
 		elf_append_loadable_data_and_locate(
@@ -72,6 +67,8 @@ int	main(
 		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
 		stub_data->entry_point = s.hdl.eh.get.entry(&s);
 		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
+		list_push(&ranges, MAKE_RANGE(s.hdl.ph.get.offset(&s, first_entry_index), s.hdl.ph.get.filesz(&s, first_entry_index)));
+		verbose("stub is off: 0x%lx, len: 0x%zx\n", s.hdl.ph.get.offset(&s, first_entry_index), s.hdl.ph.get.filesz(&s, first_entry_index));
 	} else {
 		elf_append_loadable_data_and_locate(
 			&s,
@@ -86,6 +83,22 @@ int	main(
 		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
 		stub_data->entry_point = s.hdl.eh.get.entry(&s);
 		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
+	}
+
+	if (elf_get_protected_ranges(&s, &ranges)) {
+		list_foreach(&ranges, it) {
+			verbose("PROTECTED RANGE :\nOFF : 0x%lx\nLEN : 0x%zx\n", it->off, it->len);
+		}
+	}
+
+	size_t range_idx = 0;
+	for (size_t k = 0; k < s.size; ++k) {
+		if (range_idx < ranges.len && (off_t)k >= ranges.data[range_idx].off) {
+			k = ranges.data[range_idx].off + ranges.data[range_idx].len - 1;
+			++range_idx;
+			continue ;
+		}
+		((char*)s.data)[k] = 0x42;
 	}
 
 	if (elf_manager_finalize(&s, "woody"))

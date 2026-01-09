@@ -263,7 +263,7 @@ xtea_encrypt:
 	cmp			rsi, 32
 	jb			.xtea_encrypt_prepare
 
-	call		test_sse
+	call		test_sse1_sse2
 	test		eax, ~(0b11<<25)
 	je			.xtea_encrypt_prepare
 
@@ -496,7 +496,7 @@ xtea_decrypt:
 	cmp			rsi, 32
 	jb			.xtea_decrypt_prepare
 
-	call		test_sse
+	call		test_sse1_sse2
 	test		eax, ~(0b11<<25)
 	je			.xtea_decrypt_prepare
 

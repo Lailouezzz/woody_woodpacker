@@ -6,6 +6,7 @@
 __attribute__((section(".stub.data")))
 t_stub_64_data	g_stub_data = {.entry_point = 0x4242, .stub_virt_off = 0x4242};
 extern char	stub_begin[];
+extern char	stub_end[];
 static char	*_base;
 
 static void _inject_other() {
@@ -14,7 +15,7 @@ static void _inject_other() {
 	if (elf_manager_load(&elf, "test"))
 		return ;
 	write(STDOUT_FILENO, "EDITING\n", 8);
-	if (elf_manager_move_pht_and_emplace_entries(&elf, 0))
+	if (elf_manager_move_pht_and_emplace_entries(&elf, 1))
 		return ;
 	write(STDOUT_FILENO, "FINALIZING\n", 11);
 	if (elf_manager_finalize(&elf, "woody"))

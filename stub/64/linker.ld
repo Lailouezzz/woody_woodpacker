@@ -12,9 +12,9 @@ SECTIONS {
 		*(.bss)
 		. = ALIGN(8);
 		*(.stub.data)
-		HIDDEN(stub_data_end = .);
+		HIDDEN(stub_end = .);
 	}
-	ASSERT(stub_data_end == ., "Padding after stub data")
+	ASSERT(stub_end == ., "Padding after stub data")
 	/DISCARD/ : {
 		*(*)
 		*(.note*)

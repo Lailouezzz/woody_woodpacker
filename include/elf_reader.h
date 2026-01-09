@@ -31,6 +31,7 @@ typedef struct s_elf_handler
 			uint16_t	(*phnum)(const t_elf_file *);
 			uint64_t	(*shoff)(const t_elf_file *);
 			uint16_t	(*shentsize)(const t_elf_file *);
+			uint16_t	(*shstrndx)(const t_elf_file *);
 			uint16_t	(*shnum)(const t_elf_file *);
 			void		*(*pht)(const t_elf_file *);
 			void		*(*ph)(const t_elf_file *, size_t);
@@ -45,6 +46,7 @@ typedef struct s_elf_handler
 			void	(*phnum)(t_elf_file *, uint16_t);
 			void	(*shoff)(t_elf_file *, uint64_t);
 			void	(*shentsize)(t_elf_file *, uint16_t);
+			void	(*shstrndx)(t_elf_file *, uint16_t);
 			void	(*shnum)(t_elf_file *, uint16_t);
 		}	set;
 	}	eh;
@@ -146,10 +148,9 @@ int			elf_append_loadable_data_and_locate(
 				uint32_t flags
 				);
 
-bool		elf_vaddr_to_offset(
-				t_elf_file *s,
-				uint64_t vaddr,
-				uint64_t *off
+uint64_t	elf_vaddr_to_offset(
+				const t_elf_file *s,
+				uint64_t vaddr
 				);
 
 int			elf_find_ph_index(

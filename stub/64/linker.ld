@@ -5,10 +5,15 @@ SECTIONS {
 	HIDDEN(stub_begin = .);
 	.text : {
 		*(.stub.init)
+		. = ALIGN(32);
 		*(.text)
+		. = ALIGN(32);
 		*(.rodata*)
+		. = ALIGN(32);
 		*(.data)
+		. = ALIGN(32);
 		*(.data.rel*)
+		. = ALIGN(32);
 		*(.bss)
 		. = ALIGN(8);
 		*(.stub.data)

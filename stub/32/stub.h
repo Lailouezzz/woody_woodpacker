@@ -5,6 +5,7 @@
 // Includes
 // ---
 
+# include <stddef.h>
 # include <stdint.h>
 # include "stub_def.h"
 
@@ -27,6 +28,20 @@ extern t_stub_32_data	g_stub_data;
 // Function declartions
 // ---
 
+const char	*get_self_path();
 
+int	fgetchar(int fd);
+
+uint64_t	fgethex(int fd);
+
+size_t	read_maps(char **buf);
+
+void	decrypt();
+
+void	ft_putstr(const char *s);
+
+void	ft_puthex(uint64_t nb);
+
+void	ft_putnbr(uint64_t nb);
 
 #endif

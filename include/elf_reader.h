@@ -151,6 +151,7 @@ int			elf_append_loadable_data_and_locate(
 				void *data,
 				size_t size,
 				size_t align,
+				size_t segment_align,
 				size_t ph_index,
 				uint32_t flags
 				);

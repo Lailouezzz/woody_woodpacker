@@ -161,7 +161,8 @@
  */
 # define UNUSED(var) ((void)var);
 
-# define ALIGN_ON(v, align) (((v) + (align) - 1) & (~((align) - 1ULL)))
+# define ALIGN_UP(v, align) (((v) + (align) - 1) & (~((align) - 1ULL)))
+# define ALIGN_DOWN(v, align) ((v) & (~((align) - 1ULL)))
 
 // ---
 // Typedefs

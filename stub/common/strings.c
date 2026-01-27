@@ -16,6 +16,17 @@ int		memcmp(
 	return (0);
 }
 
+int	strcmp(
+	const char *s1,
+	const char *s2
+	) {
+	while (*s1 && *s2) {
+		++s1;
+		++s2;
+	}
+	return *s1 - *s2;
+}
+
 void	*memcpy(
 			void *restrict dst,
 			const void *restrict src,
@@ -62,4 +73,11 @@ void	*memset(
 	while (n)
 		((char *)ptr)[--n] = c;
 	return (ptr);
+}
+
+int	strlen(const char *s) {
+	int k = 0;
+	while (*(s++))
+		++k;
+	return (k);
 }

@@ -6,7 +6,7 @@
 /*   By: Antoine Massias <massias.antoine.pro@gm    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 14:18:35 by amassias          #+#    #+#             */
-/*   Updated: 2026/01/27 11:31:01 by ale-boud         ###   ########.fr       */
+/*   Updated: 2026/01/27 12:10:37 by ale-boud         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ int		elf_manager_move_pht_and_emplace_entries(
 {
 	const size_t	num = s->hdl.eh.get.phnum(s);
 	const size_t	entsize = s->hdl.eh.get.phentsize(s);
-	const size_t	pht_pos = ALIGN_ON(s->size, 8);
+	const size_t	pht_pos = ALIGN_UP(s->size, 8);
 	const size_t	pht_new_size = entsize * (num + n + 1);
 	const size_t	phdr_index = _get_phdr_index(s);
 	size_t			pht_vaddr;
@@ -112,7 +112,7 @@ int		elf_manager_move_pht_and_emplace_entries(
 	s->hdl.eh.set.phoff(s,pht_pos);
 	s->hdl.eh.set.phnum(s,num + n + 1);
 
-	pht_vaddr = ALIGN_ON(s->next_available_vaddr + 1, 0x1000UL);
+	pht_vaddr = ALIGN_UP(s->next_available_vaddr + 1, 0x1000UL);
 	pht_vaddr += pht_pos % 0x1000;
 
 
@@ -133,9 +133,6 @@ int		elf_manager_move_pht_and_emplace_entries(
 	s->hdl.ph.set.filesz(s,num, pht_new_size);
 	s->hdl.ph.set.memsz(s,num, pht_new_size);
 	s->hdl.ph.set.align(s,num, 0x1000);
-
-	s->next_available_vaddr = ALIGN_ON(pht_vaddr + pht_new_size, 0x1000);
-
 	return (EXIT_SUCCESS);
 }
 
@@ -144,34 +141,36 @@ int		elf_append_loadable_data_and_locate(
 			void *data,
 			size_t size,
 			size_t align,
+			size_t segment_align,
 			size_t ph_index,
 			uint32_t flags
 			)
 {
 	void	*new_data;
 	size_t	data_vaddr;
+	size_t	padding;
 
-	new_data = mremap(s->data, s->size, s->size + size, MREMAP_MAYMOVE);
+	padding = segment_align - s->size % segment_align;
+	new_data = mremap(s->data, s->size, s->size + padding + size, MREMAP_MAYMOVE);
 	if (new_data == MAP_FAILED)
 		return (EXIT_FAILURE);
 	s->data = new_data;
 
-	memcpy(&((uint8_t *)s->data)[s->size], data, size);
+	memcpy(&((uint8_t *)s->data)[s->size + padding], data, size);
 
-	data_vaddr = ALIGN_ON(s->next_available_vaddr + 1, align);
-	data_vaddr += s->size % align;
+	data_vaddr = ALIGN_UP(_get_next_available_vaddr(s) + 1, align);
+	data_vaddr += (s->size + padding) % align;
 
 	s->hdl.ph.set.type(s,ph_index, PT_LOAD);
 	s->hdl.ph.set.flags(s,ph_index, flags);
-	s->hdl.ph.set.offset(s,ph_index, s->size);
+	s->hdl.ph.set.offset(s,ph_index, s->size + padding);
 	s->hdl.ph.set.vaddr(s,ph_index, data_vaddr);
 	s->hdl.ph.set.paddr(s,ph_index, data_vaddr);
 	s->hdl.ph.set.filesz(s,ph_index, size);
 	s->hdl.ph.set.memsz(s,ph_index, size);
 	s->hdl.ph.set.align(s,ph_index, align);
 
-	s->next_available_vaddr = data_vaddr;
-	s->size += size;
+	s->size += size + padding;
 	return (EXIT_SUCCESS);
 }
 
@@ -207,13 +206,6 @@ size_t		elf_get_size(
 				)
 {
 	return (s->size);
-}
-
-uint64_t	elf_get_next_vaddr(
-				t_elf_file *s
-				)
-{
-	return (s->next_available_vaddr);
 }
 
 uint64_t	elf_vaddr_to_offset(

@@ -6,6 +6,7 @@
 #include "elf_reader.h"
 #include "protect_range.h"
 #include "utils.h"
+#include "encrypt.h"
 #include "stub/32/stub_def.h"
 #include "stub/64/stub_def.h"
 
@@ -62,6 +63,7 @@ int	main(
 			_binary_ressources_stub64_bin_start,
 			_binary_ressources_stub64_bin_end - _binary_ressources_stub64_bin_start,
 			0x1000,
+			0x20,
 			first_entry_index,
 			PF_X | PF_R | PF_W
 		);
@@ -72,6 +74,7 @@ int	main(
 			ranges.data,
 			(ranges.len + 1) * sizeof(*ranges.data),
 			0x1000,
+			0x20,
 			first_entry_index + 1,
 			PF_R
 		);
@@ -89,7 +92,7 @@ int	main(
 		t_stub_64_data	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(t_stub_64_data);
 		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
 		stub_data->entry_point = s.hdl.eh.get.entry(&s);
-		stub_data->ranges.data = (void*)s.hdl.ph.get.vaddr(&s, first_entry_index + 1);
+		stub_data->ranges.data = (void*)(uintptr_t)s.hdl.ph.get.vaddr(&s, first_entry_index + 1);
 		stub_data->ranges.len = ranges.len + 1;
 		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
 		verbose("stub is off: 0x%lx, len: 0x%zx\n", s.hdl.ph.get.offset(&s, first_entry_index), s.hdl.ph.get.filesz(&s, first_entry_index));
@@ -99,6 +102,7 @@ int	main(
 			_binary_ressources_stub32_bin_start,
 			_binary_ressources_stub32_bin_end - _binary_ressources_stub32_bin_start,
 			0x1000,
+			0x20,
 			first_entry_index,
 			PF_X | PF_R | PF_W
 		);
@@ -109,16 +113,14 @@ int	main(
 		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
 	}
 
-	size_t range_idx = 0;
-	for (size_t k = 0; k < s.size; ++k) {
-		if (range_idx < ranges.len && (off_t)k >= ranges.data[range_idx].off) {
-			k = ranges.data[range_idx].off + ranges.data[range_idx].len - 1;
-			++range_idx;
+	for (size_t k = 0; k < ranges.len - 1 && ranges.len != 0; ++k) {
+		auto const	start_off = ALIGN_UP(ranges.data[k].off + ranges.data[k].len, 8);
+		auto const	size = ((off_t)ALIGN_DOWN(ranges.data[k + 1].off, 8)) - (off_t)start_off;
+		if (size <= 0)
 			continue ;
-		}
-		((char*)s.data)[k] = 0x42;
+		verbose("ENCRYPT FROM : 0x%lx TO : 0x%lx (size: 0x%lx)\n", start_off, start_off + size - 1, size);
+		xtea_encrypt((char *)s.data + start_off, size, (const uint32_t *)"1234567812345678");
 	}
-
 	if (elf_manager_finalize(&s, "woody"))
 		return (EXIT_FAILURE);
 

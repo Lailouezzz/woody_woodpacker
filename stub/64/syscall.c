@@ -24,6 +24,7 @@
 #define SYS_MREMAP 25
 #define SYS_MSYNC 26
 #define SYS_FTRUNCATE 77
+#define SYS_READLINK 89
 
 #define MREMAP_FIXED 0x2
 
@@ -42,6 +43,10 @@ static inline long syscall6(long n, long a1, long a2, long a3, long a4, long a5,
 // ---
 // Extern function definitions
 // ---
+
+ssize_t	read(int fd, char *buf, size_t size) {
+	return (ssize_t)syscall3(SYS_READ, fd, (long)buf, size);
+}
 
 ssize_t	write(int fd, const char *buf, size_t size) {
 	return (ssize_t)syscall3(SYS_WRITE, fd, (long)buf, size);
@@ -95,6 +100,10 @@ int	mremap(void *old_addr, size_t old_size, size_t new_size, int flags, ...) {
 
 int	fstat(int fd, struct stat *st) {
 	return syscall2(SYS_FSTAT, fd, (long)st);
+}
+
+ssize_t	readlink(const char *restrict path, char *buf, int bufsiz) {
+	return syscall3(SYS_READLINK, (long)path, (long)buf, bufsiz);
 }
 
 // ---

@@ -155,9 +155,13 @@ $(OBJDIR)/stub/64/%.c.o: stub/64/%.c
 	$(call qcmd,$(MKDIR) -p $(@D))
 	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB64) -I$(INCDIR) -c $< -o $@)
 
+$(OBJDIR)/stub/64/%.c.o: stub/common/%.c
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB64) -I$(INCDIR) -c $< -o $@)
+
 # Make the stub64.biin
 
-$(OBJDIR)/stub64.o: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o $(OBJDIR)/stub/64/elf/elf_reader32.c.o $(OBJDIR)/stub/64/elf/elf_reader64.c.o $(OBJDIR)/stub/64/elf.c.o $(OBJDIR)/stub/64/strings.c.o $(OBJDIR)/stub/64/elf/raw_data_rw.c.o $(OBJDIR)/stub/64/syscall.c.o
+$(OBJDIR)/stub64.o: $(OBJDIR)/stub/64/stub.S.o $(OBJDIR)/stub/64/stub.c.o $(OBJDIR)/stub/64/elf/elf_reader32.c.o $(OBJDIR)/stub/64/elf/elf_reader64.c.o $(OBJDIR)/stub/64/elf.c.o $(OBJDIR)/stub/64/strings.c.o $(OBJDIR)/stub/64/utils.c.o $(OBJDIR)/stub/64/elf/raw_data_rw.c.o $(OBJDIR)/stub/64/syscall.c.o
 	$(call bcmd,ld,$^,$(LD) -nostdlib -r -o $@ $^ -z noexecstack)
 
 comma := ,
@@ -180,9 +184,13 @@ $(OBJDIR)/stub/32/%.c.o: stub/32/%.c
 	$(call qcmd,$(MKDIR) -p $(@D))
 	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB32) -I$(INCDIR) -c $< -o $@)
 
+$(OBJDIR)/stub/32/%.c.o: stub/common/%.c
+	$(call qcmd,$(MKDIR) -p $(@D))
+	$(call bcmd,cc,$<,$(CC) $(CFLAGS_STUB32) -I$(INCDIR) -c $< -o $@)
+
 # Make the stub32.biin
 
-$(OBJDIR)/stub32.o: $(OBJDIR)/stub/32/stub.S.o $(OBJDIR)/stub/32/stub.c.o $(OBJDIR)/stub/32/elf/elf_reader32.c.o $(OBJDIR)/stub/32/elf/elf_reader64.c.o $(OBJDIR)/stub/32/elf.c.o $(OBJDIR)/stub/32/strings.c.o $(OBJDIR)/stub/32/elf/raw_data_rw.c.o $(OBJDIR)/stub/32/syscall.c.o
+$(OBJDIR)/stub32.o: $(OBJDIR)/stub/32/stub.S.o $(OBJDIR)/stub/32/stub.c.o $(OBJDIR)/stub/32/elf/elf_reader32.c.o $(OBJDIR)/stub/32/elf/elf_reader64.c.o $(OBJDIR)/stub/32/elf.c.o $(OBJDIR)/stub/32/strings.c.o $(OBJDIR)/stub/32/utils.c.o $(OBJDIR)/stub/32/elf/raw_data_rw.c.o $(OBJDIR)/stub/32/syscall.c.o
 	$(call bcmd,ld,$^,$(LD) -nostdlib -m32 -r -o $@ $^ -z noexecstack)
 
 $(OBJDIR)/stub32.elf: $(OBJDIR)/stub32.o

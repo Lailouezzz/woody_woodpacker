@@ -216,10 +216,9 @@ uint64_t	elf_get_next_vaddr(
 	return (s->next_available_vaddr);
 }
 
-bool		elf_vaddr_to_offset(
-				t_elf_file *s,
-				uint64_t vaddr,
-				uint64_t *off
+uint64_t	elf_vaddr_to_offset(
+				const t_elf_file *s,
+				uint64_t vaddr
 				) {
 	auto const	phnum = s->hdl.eh.get.phnum(s);
 
@@ -230,12 +229,11 @@ bool		elf_vaddr_to_offset(
 			auto const	p_filesz = s->hdl.ph.get.memsz(s, k);
 			auto const	p_offset = s->hdl.ph.get.offset(s, k);
 			if (vaddr >= p_vaddr && vaddr < p_vaddr + p_filesz) {
-				*off = (vaddr - p_vaddr) + p_offset;
-				return (true);
+				return ((vaddr - p_vaddr) + p_offset);
 			}
 		}
 	}
-	return (false);
+	return (0);
 }
 
 int			elf_find_ph_index(

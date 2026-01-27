@@ -48,12 +48,15 @@ int	main(
 		return (EXIT_FAILURE);
 
 	first_entry_index = s.hdl.eh.get.phnum(&s) + 1;
-	if (elf_manager_move_pht_and_emplace_entries(&s, 1))
+	if (elf_manager_move_pht_and_emplace_entries(&s, 2))
 		return (EXIT_FAILURE);
 
 	t_ranges	ranges = list_new();
 
 	if (s.is_64) {
+		if (!elf_get_protected_ranges(&s, &ranges)) {
+			return (EXIT_FAILURE);
+		}
 		elf_append_loadable_data_and_locate(
 			&s,
 			_binary_ressources_stub64_bin_start,
@@ -62,12 +65,33 @@ int	main(
 			first_entry_index,
 			PF_X | PF_R | PF_W
 		);
+		list_push(&ranges, MAKE_RANGE(s.hdl.ph.get.offset(&s, first_entry_index), s.hdl.ph.get.filesz(&s, first_entry_index)));
+		range_aggregate(&ranges);
+		elf_append_loadable_data_and_locate(
+			&s,
+			ranges.data,
+			(ranges.len + 1) * sizeof(*ranges.data),
+			0x1000,
+			first_entry_index + 1,
+			PF_R
+		);
+		list_push(&ranges, MAKE_RANGE(s.hdl.ph.get.offset(&s, first_entry_index+1), s.hdl.ph.get.filesz(&s, first_entry_index+1)));
+		range_aggregate(&ranges);
+		list_foreach(&ranges, it) {
+			verbose("PROTECTED RANGE :\nOFF : 0x%lx\nLEN : 0x%zx\n", it->off, it->len);
+		}
+		t_range *last_range = s.data + s.hdl.ph.get.offset(&s, first_entry_index + 1) + s.hdl.ph.get.memsz(&s, first_entry_index + 1) - sizeof(t_range);
+
+		last_range->off = s.hdl.ph.get.offset(&s, first_entry_index + 1);
+		last_range->len = (ranges.len + 1) * sizeof(t_range);
+
 
 		t_stub_64_data	*stub_data = s.data + s.hdl.ph.get.offset(&s, first_entry_index) + s.hdl.ph.get.memsz(&s, first_entry_index) - sizeof(t_stub_64_data);
 		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
 		stub_data->entry_point = s.hdl.eh.get.entry(&s);
+		stub_data->ranges.data = (void*)s.hdl.ph.get.vaddr(&s, first_entry_index + 1);
+		stub_data->ranges.len = ranges.len + 1;
 		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
-		list_push(&ranges, MAKE_RANGE(s.hdl.ph.get.offset(&s, first_entry_index), s.hdl.ph.get.filesz(&s, first_entry_index)));
 		verbose("stub is off: 0x%lx, len: 0x%zx\n", s.hdl.ph.get.offset(&s, first_entry_index), s.hdl.ph.get.filesz(&s, first_entry_index));
 	} else {
 		elf_append_loadable_data_and_locate(
@@ -83,12 +107,6 @@ int	main(
 		stub_data->stub_virt_off = s.hdl.ph.get.vaddr(&s, first_entry_index);
 		stub_data->entry_point = s.hdl.eh.get.entry(&s);
 		s.hdl.eh.set.entry(&s, s.hdl.ph.get.vaddr(&s, first_entry_index));
-	}
-
-	if (elf_get_protected_ranges(&s, &ranges)) {
-		list_foreach(&ranges, it) {
-			verbose("PROTECTED RANGE :\nOFF : 0x%lx\nLEN : 0x%zx\n", it->off, it->len);
-		}
 	}
 
 	size_t range_idx = 0;

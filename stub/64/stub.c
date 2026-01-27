@@ -22,8 +22,40 @@ static void _inject_other() {
 		return ;
 }
 
+void	ft_puthex(uint64_t nb) {
+	char	buf[2 * sizeof(nb)] = {0};
+	const char *a = "0123456789ABCDEF";
+	int i = sizeof(buf) - 1;
+	buf[i] = '0';
+	while (nb != 0) {
+		buf[i--] = a[nb % 16];
+		nb /= 16;
+	}
+	write(STDOUT_FILENO, &buf[i], sizeof(buf)-i);
+	write(STDOUT_FILENO, "\n", 1);
+}
+
+void	ft_putnbr(uint64_t nb) {
+	char	buf[32] = {0};
+	int i = 31;
+	buf[i] = '0';
+	while (nb != 0) {
+		buf[i--] = '0' + nb % 10;
+		nb /= 10;
+	}
+	write(STDOUT_FILENO, &buf[i], sizeof(buf)-i);
+	write(STDOUT_FILENO, "\n", 1);
+}
+
 void *stub_main(void) {
 	_base = (char*)stub_begin - g_stub_data.stub_virt_off;
+	g_stub_data.ranges.data = (t_range *)((uintptr_t)g_stub_data.ranges.data + _base);
+	ft_putnbr(g_stub_data.ranges.len);
+	ft_puthex((uintptr_t)g_stub_data.ranges.data);
+	list_foreach(&g_stub_data.ranges, it) {
+		ft_puthex(it->off);
+		ft_puthex(it->len);
+	}
 	_inject_other();
 	return (g_stub_data.entry_point + _base);
 }

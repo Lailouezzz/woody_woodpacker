@@ -14,6 +14,13 @@
 # define ELF_READER_H
 
 # include <elf.h>
+
+# ifndef DT_RELR
+#  define DT_RELR      36
+#  define DT_RELRSZ    35
+#  define DT_RELRENT   37
+# endif
+
 # include <stdlib.h>
 # include <stdint.h>
 
@@ -148,10 +155,9 @@ int			elf_append_loadable_data_and_locate(
 				uint32_t flags
 				);
 
-bool		elf_vaddr_to_offset(
-				t_elf_file *s,
-				uint64_t vaddr,
-				uint64_t *off
+uint64_t	elf_vaddr_to_offset(
+				const t_elf_file *s,
+				uint64_t vaddr
 				);
 
 int			elf_find_ph_index(

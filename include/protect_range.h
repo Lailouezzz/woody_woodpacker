@@ -80,7 +80,7 @@ typedef struct {
 	uint64_t flags;            /**< DT_FLAGS */
 	uint64_t flags_1;          /**< DT_FLAGS_1 */
 	bool has_textrel;          /**< True if TEXTREL is set */
-} elf_dynamic_t;
+}	t_elf_dynamic;
 
 typedef struct s_range {
 	off_t	off;
@@ -102,6 +102,10 @@ TYPEDEF_LIST(t_range, ranges);
  */
 bool	elf_get_protected_ranges(
 			const t_elf_file *elf,
+			t_ranges *ranges
+			);
+
+void	range_aggregate(
 			t_ranges *ranges
 			);
 

@@ -21,7 +21,8 @@
 typedef struct {
 	uint64_t	stub_virt_off;
 	uint64_t	entry_point;
-	t_ranges	ranges;
+	uint64_t	ranges_ptr;
+	uint64_t	ranges_len;
 }	t_stub_64_data;
 
 // ---

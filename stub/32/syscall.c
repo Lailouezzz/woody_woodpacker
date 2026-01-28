@@ -103,8 +103,12 @@ int	fstat(int fd, struct stat *st) {
 	return syscall2(SYS_FSTAT64, fd, (long)st);
 }
 
-int	readlink(const char *restrict path, char *buf, size_t bufsiz) {
-	return syscall3(SYS_FSTAT64, (long)path, (long)buf, bufsiz);
+ssize_t	readlink(const char *restrict path, char *buf, size_t bufsiz) {
+	return syscall3(SYS_READLINK, (long)path, (long)buf, bufsiz);
+}
+
+int	mprotect(void *addr, size_t size, int prot) {
+	return syscall3(SYS_MPROTECT, (long)addr, size, prot);
 }
 
 // ---

@@ -183,20 +183,14 @@ static bool	_add_dyn_to_range(
 	if (!_parse_dynamic(elf, pt_dyn_idx, &dyn))
 		return (false);
 
-	verbose("DT_STRTAB : 0x%llx\n", dyn.strtab);
 	if (dyn.strtab && dyn.strsz) {
 		uint64_t off = elf_vaddr_to_offset(elf, dyn.strtab);
-		verbose("OFF : 0x%llx\n", off);
-		verbose("SIZE : 0x%lld\n", dyn.strsz);
 		if (off && !list_push(ranges, MAKE_RANGE(off, dyn.strsz)))
 			return (false);
 	}
 
-	verbose("DT_SYMTAB : 0x%llx\n", dyn.symtab);
 	if (dyn.symtab && dyn.strtab && dyn.strtab > dyn.symtab) {
 		uint64_t off = elf_vaddr_to_offset(elf, dyn.symtab);
-		verbose("OFF : 0x%llx\n", off);
-		verbose("SIZE : 0x%llx\n", dyn.strtab - dyn.symtab);
 		if (off && !list_push(ranges, MAKE_RANGE(off, dyn.strtab - dyn.symtab)))
 			return (false);
 	}
@@ -205,21 +199,17 @@ static bool	_add_dyn_to_range(
 	if (dyn.symtab && dyn.strtab && dyn.syment)
 		nsyms = (dyn.strtab - dyn.symtab) / dyn.syment;
 
-	verbose("DT_HASH : 0x%llx\n", dyn.hash);
 	if (dyn.hash) {
 		uint64_t off = elf_vaddr_to_offset(elf, dyn.hash);
 		if (off) {
 			const uint32_t *h = (const uint32_t *)((const char *)elf->data + off);
 			uint32_t nbucket = h[0];
 			uint32_t nchain = h[1];
-			verbose("OFF : 0x%llx\n", off);
-			verbose("SIZE: 0x%llx\n", (2 + nbucket + nchain) * sizeof(uint32_t));
 			if (!list_push(ranges, MAKE_RANGE(off, (2 + nbucket + nchain) * sizeof(uint32_t))))
 				return (false);
 		}
 	}
 
-	verbose("DT_GNU_HASH : 0x%llx\n", dyn.gnu_hash);
 	if (dyn.gnu_hash) {
 		uint64_t off = elf_vaddr_to_offset(elf, dyn.gnu_hash);
 		if (off) {
@@ -234,8 +224,6 @@ static bool	_add_dyn_to_range(
 
 			uint64_t total = 16 + maskwords * ptr_size + nbuckets * 4 + chains_size;
 
-			verbose("OFF : 0x%llx\n", off);
-			verbose("SIZE : 0x%llx\n", total);
 			if (!list_push(ranges, MAKE_RANGE(off, total)))
 				return (false);
 		}
@@ -394,7 +382,6 @@ static bool	_parse_dynamic(
 				d->has_textrel = true;
 				break ;
 			default:
-				verbose("UNKNOWN TAG : %ld\n", dyn[i].d_tag);
 				break ;
 			}
 		}

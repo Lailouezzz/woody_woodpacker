@@ -650,3 +650,5 @@ xtea_decrypt:
 
 	# Cleanup and exit
 	jmp			.xtea_decrypt_cleanup
+
+.section .note.GNU-stack,"",@progbits

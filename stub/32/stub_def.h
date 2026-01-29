@@ -6,6 +6,7 @@
 // ---
 
 # include <stdint.h>
+# include "protect_range.h"
 
 // ---
 // Defines
@@ -17,9 +18,11 @@
 // Typedefs
 // ---
 
-typedef struct __attribute__((packed)) {
+typedef struct {
 	uint32_t	stub_virt_off;
 	uint32_t	entry_point;
+	uint32_t	ranges_ptr;
+	uint32_t	ranges_len;
 }	t_stub_32_data;
 
 // ---

@@ -83,8 +83,8 @@ typedef struct {
 }	t_elf_dynamic;
 
 typedef struct s_range {
-	off_t	off;
-	size_t	len;
+	int64_t		off;
+	uint64_t	len;
 }	t_range;
 
 TYPEDEF_LIST(t_range, ranges);

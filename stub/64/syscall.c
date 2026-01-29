@@ -20,6 +20,7 @@
 #define SYS_FSTAT 5
 #define SYS_LSEEK 8
 #define SYS_MMAP 9
+#define SYS_MPROTECT 10
 #define SYS_MUNMAP 11
 #define SYS_MREMAP 25
 #define SYS_MSYNC 26
@@ -104,6 +105,10 @@ int	fstat(int fd, struct stat *st) {
 
 ssize_t	readlink(const char *restrict path, char *buf, int bufsiz) {
 	return syscall3(SYS_READLINK, (long)path, (long)buf, bufsiz);
+}
+
+int	mprotect(void *addr, size_t size, int prot) {
+	return syscall3(SYS_MPROTECT, (long)addr, size, prot);
 }
 
 // ---

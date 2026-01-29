@@ -35,7 +35,7 @@ uint64_t	fgethex(int fd);
 
 size_t	read_maps(char **buf);
 
-void	decrypt();
+void	decrypt(const t_range *protected_ranges, uint64_t ranges_len);
 
 void	ft_putstr(const char *s);
 

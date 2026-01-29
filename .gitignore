@@ -4,6 +4,7 @@ Makefile.cfg
 # Binary
 build/
 woody_woodpacker
+woody
 
 # clangd
 .cache/

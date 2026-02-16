@@ -206,7 +206,7 @@ static bool	_add_bss_to_range(
 			continue ;
 		auto const offset = elf->hdl.ph.get.offset(elf, k);
 		if ((offset + filesz) % 4 == 0)
-			return (false);
+			continue ;
 		auto const down_addr = ALIGN_DOWN(offset + filesz, 4);
 		if (!list_push(ranges, MAKE_RANGE(down_addr, 4)))
 			return (false);

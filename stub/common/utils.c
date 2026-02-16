@@ -171,8 +171,6 @@ void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_r
 		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, prev_perm);
 	}
 
-	// ft_putstr(self_path);
-
 	munmap(maps, maps_size);
 }
 
@@ -204,11 +202,6 @@ static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr, uint
 		auto const	size = MIN(((off_t)ALIGN_DOWN(ranges->data[k].off, 8)) - (begin_vaddr - start_vaddr) - off, end_vaddr - begin_vaddr + 1);
 		if (size == 0 || ALIGN_UP(ranges->data[k - 1].off + ranges->data[k - 1].len - 1, 8) >= ALIGN_DOWN(ranges->data[k].off, 8))
 			continue ;
-		ft_putstr("0x");
-		ft_puthex(begin_vaddr - start_vaddr + off);
-		ft_putstr(" => 0x");
-		ft_puthex(begin_vaddr - start_vaddr + off + size - 1);
-		ft_putstr("\n");
 		xtea_decrypt((void*)(uintptr_t)begin_vaddr, size, (const uint32_t *)"1234567812345678");
 	}
 }

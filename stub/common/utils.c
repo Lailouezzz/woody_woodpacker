@@ -98,6 +98,12 @@ void	ft_putstr(const char *s) {
 	}
 }
 
+void	ft_putline(const char *s) {
+	while (*s && *s != '\n') {
+		write(STDOUT_FILENO, s++, 1);
+	}
+}
+
 void	ft_puthex(uint64_t nb) {
 	char	buf[2 * sizeof(nb)] = {0};
 	int i = sizeof(buf) - 1;
@@ -186,6 +192,8 @@ static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges, uint64_t start_vad
 		vaddr = bss_ranges->data[k].off + base;
 		++k;
 	}
+	if (vaddr < start_vaddr)
+		return (0);
 	return (vaddr);
 } 
 

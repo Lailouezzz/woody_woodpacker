@@ -149,13 +149,13 @@ static bool	_elf_get_protected_ranges(
 		array_foreach(_protected_types, it)
 			if (elf->hdl.ph.get.type(elf, k) == *it) 
 				_add_ph_to_range(ranges, elf, k);
+	if (!_add_bss_to_range(ranges, elf))
+		return (false);
 	if (pt_dyn_idx < 0) // No dynamics
 		return (true);
 	if (!_add_ph_to_range(ranges, elf, pt_dyn_idx))
 		return (false);
 	if (!_add_dyn_to_range(ranges, elf, pt_dyn_idx))
-		return (false);
-	if (!_add_bss_to_range(ranges, elf))
 		return (false);
 	return (true);
 }

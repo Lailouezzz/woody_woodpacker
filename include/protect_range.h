@@ -109,4 +109,9 @@ void	range_aggregate(
 			t_ranges *ranges
 			);
 
+bool	elf_get_bss_vaddr_ranges(
+			const t_elf_file *elf,
+			t_ranges *ranges
+			);
+
 #endif

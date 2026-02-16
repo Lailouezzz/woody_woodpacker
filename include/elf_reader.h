@@ -40,6 +40,7 @@ typedef struct s_elf_handler
 			uint16_t	(*shentsize)(const t_elf_file *);
 			uint16_t	(*shstrndx)(const t_elf_file *);
 			uint16_t	(*shnum)(const t_elf_file *);
+			uint16_t	(*type)(const t_elf_file *);
 			void		*(*pht)(const t_elf_file *);
 			void		*(*ph)(const t_elf_file *, size_t);
 			void		*(*sht)(const t_elf_file *);

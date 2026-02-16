@@ -23,6 +23,8 @@ typedef struct {
 	uint32_t	entry_point;
 	uint32_t	ranges_ptr;
 	uint32_t	ranges_len;
+	uint32_t	bss_ranges_ptr;
+	uint32_t	bss_ranges_len;
 }	t_stub_32_data;
 
 // ---

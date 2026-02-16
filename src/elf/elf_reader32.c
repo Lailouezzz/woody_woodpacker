@@ -39,6 +39,11 @@ uint16_t	_get_eh_phnum(
 				);
 
 static
+uint16_t	_get_eh_type(
+				const t_elf_file *s
+				);
+
+static
 void		*_get_pht(
 				const t_elf_file *s
 				);
@@ -367,6 +372,7 @@ void	int_elf_load_32bit_handlers(
 	s->hdl.eh.get.phentsize = _get_eh_phentsize;
 	s->hdl.eh.get.shstrndx = _get_eh_shstrndx;
 	s->hdl.eh.get.phnum = _get_eh_phnum;
+	s->hdl.eh.get.type = _get_eh_type;
 	s->hdl.eh.get.shoff = _get_eh_shoff;
 	s->hdl.eh.get.shentsize = _get_eh_shentsize;
 	s->hdl.eh.get.shnum = _get_eh_shnum;
@@ -463,6 +469,14 @@ uint16_t	_get_eh_phnum(
 				)
 {
 	return (s->io.read16(s->data, ELF32_OFF__EH_PHNUM));
+}
+
+static
+uint16_t	_get_eh_type(
+				const t_elf_file *s
+				)
+{
+	return (s->io.read16(s->data, ELF32_OFF__EH_TYPE));
 }
 
 static

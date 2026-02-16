@@ -180,7 +180,7 @@
 	shr				r14d, 5											# r13d = v1 >> 5
 	xor				r13d, r14d										# r13d = (v1 << 4) ^ (v1 >> 5)
 	add				r13d, r11d										# r13d += v1
-	mov				r14d, dword ptr [rdx + \ko1]					# r14d = key[i]
+	mov				r14d, dword ptr [rdx + 4 * \ko1]					# r14d = key[i]
 	add				r14d, \cd1
 	xor				r13d, r14d										# r13d ^= key[i]
 	add				r10d, r13d										# r13d += v[0] (first word of the block)
@@ -191,7 +191,7 @@
 	shr				r14d, 5											# r12d = v0 >> 5
 	xor				r12d, r14d										# r12d = (v0 << 4) ^ (v0 >> 5)
 	add				r12d, r10d										# r12d += v0
-	mov				r14d, dword ptr [rdx + \ko2]					# r14d = key[i]
+	mov				r14d, dword ptr [rdx + 4 * \ko2]					# r14d = key[i]
 	add				r14d, \cd2
 	xor				r12d, r14d										# r12d ^= key[i]
 	add				r11d, r12d										# r12d += v[1] (first word of the block)
@@ -288,39 +288,38 @@ xtea_encrypt:
 	mov			r10d, dword ptr [rax + 8*rsi + 0]
 	mov			r11d, dword ptr [rax + 8*rsi + 4]
 
-	xtea_encrypt_do_round 1 0x00000000 3 0x9E3779B9
-	xtea_encrypt_do_round 2 0x9E3779B9 2 0x3C6EF372
-	xtea_encrypt_do_round 3 0x3C6EF372 1 0xDAA66D2B
-	xtea_encrypt_do_round 0 0xDAA66D2B 0 0x78DDE6E4
-	xtea_encrypt_do_round 1 0x78DDE6E4 0 0x1715609D
-	xtea_encrypt_do_round 2 0x1715609D 3 0xB54CDA56
-	xtea_encrypt_do_round 3 0xB54CDA56 2 0x5384540F
-	xtea_encrypt_do_round 0 0x5384540F 1 0xF1BBCDC8
-	xtea_encrypt_do_round 1 0xF1BBCDC8 0 0x8FF34781
-	xtea_encrypt_do_round 2 0x8FF34781 0 0x2E2AC13A
-	xtea_encrypt_do_round 3 0x2E2AC13A 3 0xCC623AF3
-	xtea_encrypt_do_round 0 0xCC623AF3 2 0x6A99B4AC
-	xtea_encrypt_do_round 1 0x6A99B4AC 1 0x08D12E65
-	xtea_encrypt_do_round 2 0x08D12E65 1 0xA708A81E
-	xtea_encrypt_do_round 3 0xA708A81E 0 0x454021D7
-	xtea_encrypt_do_round 0 0x454021D7 3 0xE3779B90
-	xtea_encrypt_do_round 1 0xE3779B90 2 0x81AF1549
-	xtea_encrypt_do_round 2 0x81AF1549 1 0x1FE68F02
-	xtea_encrypt_do_round 3 0x1FE68F02 1 0xBE1E08BB
-	xtea_encrypt_do_round 0 0xBE1E08BB 0 0x5C558274
-	xtea_encrypt_do_round 1 0x5C558274 3 0xFA8CFC2D
-	xtea_encrypt_do_round 2 0xFA8CFC2D 2 0x98C475E6
-	xtea_encrypt_do_round 3 0x98C475E6 1 0x36FBEF9F
-	xtea_encrypt_do_round 0 0x36FBEF9F 1 0xD5336958
-	xtea_encrypt_do_round 1 0xD5336958 0 0x736AE311
-	xtea_encrypt_do_round 2 0x736AE311 3 0x11A25CCA
-	xtea_encrypt_do_round 3 0x11A25CCA 2 0xAFD9D683
-	xtea_encrypt_do_round 0 0xAFD9D683 2 0x4E11503C
-	xtea_encrypt_do_round 1 0x4E11503C 1 0xEC48C9F5
-	xtea_encrypt_do_round 2 0xEC48C9F5 0 0x8A8043AE
-	xtea_encrypt_do_round 3 0x8A8043AE 3 0x28B7BD67
-	xtea_encrypt_do_round 0 0x28B7BD67 2 0xC6EF3720
-	xtea_encrypt_do_round 1 0xC6EF3720 2 0x6526B0D9
+	xtea_encrypt_do_round 0 0x00000000 3 0x9E3779B9
+	xtea_encrypt_do_round 1 0x9E3779B9 2 0x3C6EF372
+	xtea_encrypt_do_round 2 0x3C6EF372 1 0xDAA66D2B
+	xtea_encrypt_do_round 3 0xDAA66D2B 0 0x78DDE6E4
+	xtea_encrypt_do_round 0 0x78DDE6E4 0 0x1715609D
+	xtea_encrypt_do_round 1 0x1715609D 3 0xB54CDA56
+	xtea_encrypt_do_round 2 0xB54CDA56 2 0x5384540F
+	xtea_encrypt_do_round 3 0x5384540F 1 0xF1BBCDC8
+	xtea_encrypt_do_round 0 0xF1BBCDC8 0 0x8FF34781
+	xtea_encrypt_do_round 1 0x8FF34781 0 0x2E2AC13A
+	xtea_encrypt_do_round 2 0x2E2AC13A 3 0xCC623AF3
+	xtea_encrypt_do_round 3 0xCC623AF3 2 0x6A99B4AC
+	xtea_encrypt_do_round 0 0x6A99B4AC 1 0x08D12E65
+	xtea_encrypt_do_round 1 0x08D12E65 1 0xA708A81E
+	xtea_encrypt_do_round 2 0xA708A81E 0 0x454021D7
+	xtea_encrypt_do_round 3 0x454021D7 3 0xE3779B90
+	xtea_encrypt_do_round 0 0xE3779B90 2 0x81AF1549
+	xtea_encrypt_do_round 1 0x81AF1549 1 0x1FE68F02
+	xtea_encrypt_do_round 2 0x1FE68F02 1 0xBE1E08BB
+	xtea_encrypt_do_round 3 0xBE1E08BB 0 0x5C558274
+	xtea_encrypt_do_round 0 0x5C558274 3 0xFA8CFC2D
+	xtea_encrypt_do_round 1 0xFA8CFC2D 2 0x98C475E6
+	xtea_encrypt_do_round 2 0x98C475E6 1 0x36FBEF9F
+	xtea_encrypt_do_round 3 0x36FBEF9F 1 0xD5336958
+	xtea_encrypt_do_round 0 0xD5336958 0 0x736AE311
+	xtea_encrypt_do_round 1 0x736AE311 3 0x11A25CCA
+	xtea_encrypt_do_round 2 0x11A25CCA 2 0xAFD9D683
+	xtea_encrypt_do_round 3 0xAFD9D683 2 0x4E11503C
+	xtea_encrypt_do_round 0 0x4E11503C 1 0xEC48C9F5
+	xtea_encrypt_do_round 1 0xEC48C9F5 0 0x8A8043AE
+	xtea_encrypt_do_round 2 0x8A8043AE 3 0x28B7BD67
+	xtea_encrypt_do_round 3 0x28B7BD67 2 0xC6EF3720
 
 	mov			dword ptr [rax + 8 * rsi + 0], r10d
 	mov			dword ptr [rax + 8 * rsi + 4], r11d
@@ -362,16 +361,16 @@ xtea_encrypt:
 	shufps		xmm13, xmm1, 0b10001000
 	shufps		xmm14, xmm1, 0b11011101
 
-	xtea_encrypt_do_vectorized_round 0 , .const_data_0, 3, .const_data_1
-	xtea_encrypt_do_vectorized_round 1 , .const_data_1, 2, .const_data_2
-	xtea_encrypt_do_vectorized_round 2 , .const_data_2, 1, .const_data_3
-	xtea_encrypt_do_vectorized_round 3 , .const_data_3, 0, .const_data_4
-	xtea_encrypt_do_vectorized_round 0 , .const_data_4, 0, .const_data_5
-	xtea_encrypt_do_vectorized_round 1 , .const_data_5, 3, .const_data_6
-	xtea_encrypt_do_vectorized_round 2 , .const_data_6, 2, .const_data_7
-	xtea_encrypt_do_vectorized_round 3 , .const_data_7, 1, .const_data_8
-	xtea_encrypt_do_vectorized_round 0 , .const_data_8, 0, .const_data_9
-	xtea_encrypt_do_vectorized_round 1 , .const_data_9, 0, .const_data_10
+	xtea_encrypt_do_vectorized_round 0 , .const_data_0,  3, .const_data_1
+	xtea_encrypt_do_vectorized_round 1 , .const_data_1,  2, .const_data_2
+	xtea_encrypt_do_vectorized_round 2 , .const_data_2,  1, .const_data_3
+	xtea_encrypt_do_vectorized_round 3 , .const_data_3,  0, .const_data_4
+	xtea_encrypt_do_vectorized_round 0 , .const_data_4,  0, .const_data_5
+	xtea_encrypt_do_vectorized_round 1 , .const_data_5,  3, .const_data_6
+	xtea_encrypt_do_vectorized_round 2 , .const_data_6,  2, .const_data_7
+	xtea_encrypt_do_vectorized_round 3 , .const_data_7,  1, .const_data_8
+	xtea_encrypt_do_vectorized_round 0 , .const_data_8,  0, .const_data_9
+	xtea_encrypt_do_vectorized_round 1 , .const_data_9,  0, .const_data_10
 	xtea_encrypt_do_vectorized_round 2 , .const_data_10, 3, .const_data_11
 	xtea_encrypt_do_vectorized_round 3 , .const_data_11, 2, .const_data_12
 	xtea_encrypt_do_vectorized_round 0 , .const_data_12, 1, .const_data_13
@@ -425,7 +424,7 @@ xtea_encrypt:
 	shr				r14d, 5											# r12d = v0 >> 5
 	xor				r12d, r14d										# r12d = (v0 << 4) ^ (v0 >> 5)
 	add				r12d, r10d										# r12d += v0
-	mov				r14d, dword ptr [rdx + \ko2]			# r14d = key[i]
+	mov				r14d, dword ptr [rdx + 4 * \ko2]			# r14d = key[i]
 	add				r14d, \cd2
 	xor				r12d, r14d										# r12d ^= key[i]
 	sub				r11d, r12d										# r12d += v[1] (first word of the block)
@@ -436,7 +435,7 @@ xtea_encrypt:
 	shr				r14d, 5											# r13d = v1 >> 5
 	xor				r13d, r14d										# r13d = (v1 << 4) ^ (v1 >> 5)
 	add				r13d, r11d										# r13d += v1
-	mov				r14d, dword ptr [rdx + \ko1]			# r14d = key[i]
+	mov				r14d, dword ptr [rdx + 4 * \ko1]			# r14d = key[i]
 	add				r14d, \cd1
 	xor				r13d, r14d										# r13d ^= key[i]
 	sub				r10d, r13d										# r13d += v[0] (first word of the block)
@@ -521,39 +520,38 @@ xtea_decrypt:
 	mov			r10d, dword ptr [rax + 8*rsi + 0]
 	mov			r11d, dword ptr [rax + 8*rsi + 4]
 
-	xtea_decrypt_do_round 1 0xC6EF3720 2 0x6526B0D9
-	xtea_decrypt_do_round 0 0x28B7BD67 2 0xC6EF3720
-	xtea_decrypt_do_round 3 0x8A8043AE 3 0x28B7BD67
-	xtea_decrypt_do_round 2 0xEC48C9F5 0 0x8A8043AE
-	xtea_decrypt_do_round 1 0x4E11503C 1 0xEC48C9F5
-	xtea_decrypt_do_round 0 0xAFD9D683 2 0x4E11503C
-	xtea_decrypt_do_round 3 0x11A25CCA 2 0xAFD9D683
-	xtea_decrypt_do_round 2 0x736AE311 3 0x11A25CCA
-	xtea_decrypt_do_round 1 0xD5336958 0 0x736AE311
-	xtea_decrypt_do_round 0 0x36FBEF9F 1 0xD5336958
-	xtea_decrypt_do_round 3 0x98C475E6 1 0x36FBEF9F
-	xtea_decrypt_do_round 2 0xFA8CFC2D 2 0x98C475E6
-	xtea_decrypt_do_round 1 0x5C558274 3 0xFA8CFC2D
-	xtea_decrypt_do_round 0 0xBE1E08BB 0 0x5C558274
-	xtea_decrypt_do_round 3 0x1FE68F02 1 0xBE1E08BB
-	xtea_decrypt_do_round 2 0x81AF1549 1 0x1FE68F02
-	xtea_decrypt_do_round 1 0xE3779B90 2 0x81AF1549
-	xtea_decrypt_do_round 0 0x454021D7 3 0xE3779B90
-	xtea_decrypt_do_round 3 0xA708A81E 0 0x454021D7
-	xtea_decrypt_do_round 2 0x08D12E65 1 0xA708A81E
-	xtea_decrypt_do_round 1 0x6A99B4AC 1 0x08D12E65
-	xtea_decrypt_do_round 0 0xCC623AF3 2 0x6A99B4AC
-	xtea_decrypt_do_round 3 0x2E2AC13A 3 0xCC623AF3
-	xtea_decrypt_do_round 2 0x8FF34781 0 0x2E2AC13A
-	xtea_decrypt_do_round 1 0xF1BBCDC8 0 0x8FF34781
-	xtea_decrypt_do_round 0 0x5384540F 1 0xF1BBCDC8
-	xtea_decrypt_do_round 3 0xB54CDA56 2 0x5384540F
-	xtea_decrypt_do_round 2 0x1715609D 3 0xB54CDA56
-	xtea_decrypt_do_round 1 0x78DDE6E4 0 0x1715609D
-	xtea_decrypt_do_round 0 0xDAA66D2B 0 0x78DDE6E4
-	xtea_decrypt_do_round 3 0x3C6EF372 1 0xDAA66D2B
-	xtea_decrypt_do_round 2 0x9E3779B9 2 0x3C6EF372
-	xtea_decrypt_do_round 1 0x00000000 3 0x9E3779B9
+	xtea_decrypt_do_round 3 0x28B7BD67 2 0xC6EF3720
+	xtea_decrypt_do_round 2 0x8A8043AE 3 0x28B7BD67
+	xtea_decrypt_do_round 1 0xEC48C9F5 0 0x8A8043AE
+	xtea_decrypt_do_round 0 0x4E11503C 1 0xEC48C9F5
+	xtea_decrypt_do_round 3 0xAFD9D683 2 0x4E11503C
+	xtea_decrypt_do_round 2 0x11A25CCA 2 0xAFD9D683
+	xtea_decrypt_do_round 1 0x736AE311 3 0x11A25CCA
+	xtea_decrypt_do_round 0 0xD5336958 0 0x736AE311
+	xtea_decrypt_do_round 3 0x36FBEF9F 1 0xD5336958
+	xtea_decrypt_do_round 2 0x98C475E6 1 0x36FBEF9F
+	xtea_decrypt_do_round 1 0xFA8CFC2D 2 0x98C475E6
+	xtea_decrypt_do_round 0 0x5C558274 3 0xFA8CFC2D
+	xtea_decrypt_do_round 3 0xBE1E08BB 0 0x5C558274
+	xtea_decrypt_do_round 2 0x1FE68F02 1 0xBE1E08BB
+	xtea_decrypt_do_round 1 0x81AF1549 1 0x1FE68F02
+	xtea_decrypt_do_round 0 0xE3779B90 2 0x81AF1549
+	xtea_decrypt_do_round 3 0x454021D7 3 0xE3779B90
+	xtea_decrypt_do_round 2 0xA708A81E 0 0x454021D7
+	xtea_decrypt_do_round 1 0x08D12E65 1 0xA708A81E
+	xtea_decrypt_do_round 0 0x6A99B4AC 1 0x08D12E65
+	xtea_decrypt_do_round 3 0xCC623AF3 2 0x6A99B4AC
+	xtea_decrypt_do_round 2 0x2E2AC13A 3 0xCC623AF3
+	xtea_decrypt_do_round 1 0x8FF34781 0 0x2E2AC13A
+	xtea_decrypt_do_round 0 0xF1BBCDC8 0 0x8FF34781
+	xtea_decrypt_do_round 3 0x5384540F 1 0xF1BBCDC8
+	xtea_decrypt_do_round 2 0xB54CDA56 2 0x5384540F
+	xtea_decrypt_do_round 1 0x1715609D 3 0xB54CDA56
+	xtea_decrypt_do_round 0 0x78DDE6E4 0 0x1715609D
+	xtea_decrypt_do_round 3 0xDAA66D2B 0 0x78DDE6E4
+	xtea_decrypt_do_round 2 0x3C6EF372 1 0xDAA66D2B
+	xtea_decrypt_do_round 1 0x9E3779B9 2 0x3C6EF372
+	xtea_decrypt_do_round 0 0x00000000 3 0x9E3779B9
 
 	mov			dword ptr [rax + 8 * rsi + 0], r10d
 	mov			dword ptr [rax + 8 * rsi + 4], r11d
@@ -595,38 +593,38 @@ xtea_decrypt:
 	shufps		xmm13, xmm1, 0b10001000
 	shufps		xmm14, xmm1, 0b11011101
 
-	xtea_decrypt_do_vectorized_round 3 , .const_data_31, 2, .const_data_32
-	xtea_decrypt_do_vectorized_round 2 , .const_data_30, 3, .const_data_31
-	xtea_decrypt_do_vectorized_round 1 , .const_data_29, 0, .const_data_30
-	xtea_decrypt_do_vectorized_round 0 , .const_data_28, 1, .const_data_29
-	xtea_decrypt_do_vectorized_round 3 , .const_data_27, 2, .const_data_28
-	xtea_decrypt_do_vectorized_round 2 , .const_data_26, 2, .const_data_27
-	xtea_decrypt_do_vectorized_round 1 , .const_data_25, 3, .const_data_26
-	xtea_decrypt_do_vectorized_round 0 , .const_data_24, 0, .const_data_25
-	xtea_decrypt_do_vectorized_round 3 , .const_data_23, 1, .const_data_24
-	xtea_decrypt_do_vectorized_round 2 , .const_data_22, 1, .const_data_23
-	xtea_decrypt_do_vectorized_round 1 , .const_data_21, 2, .const_data_22
-	xtea_decrypt_do_vectorized_round 0 , .const_data_20, 3, .const_data_21
-	xtea_decrypt_do_vectorized_round 3 , .const_data_19, 0, .const_data_20
-	xtea_decrypt_do_vectorized_round 2 , .const_data_18, 1, .const_data_19
-	xtea_decrypt_do_vectorized_round 1 , .const_data_17, 1, .const_data_18
-	xtea_decrypt_do_vectorized_round 0 , .const_data_16, 2, .const_data_17
-	xtea_decrypt_do_vectorized_round 3 , .const_data_15, 3, .const_data_16
-	xtea_decrypt_do_vectorized_round 2 , .const_data_14, 0, .const_data_15
-	xtea_decrypt_do_vectorized_round 1 , .const_data_13, 1, .const_data_14
-	xtea_decrypt_do_vectorized_round 0 , .const_data_12, 1, .const_data_13
-	xtea_decrypt_do_vectorized_round 3 , .const_data_11, 2, .const_data_12
-	xtea_decrypt_do_vectorized_round 2 , .const_data_10, 3, .const_data_11
-	xtea_decrypt_do_vectorized_round 1 , .const_data_9, 0, .const_data_10
-	xtea_decrypt_do_vectorized_round 0 , .const_data_8, 0, .const_data_9
-	xtea_decrypt_do_vectorized_round 3 , .const_data_7, 1, .const_data_8
-	xtea_decrypt_do_vectorized_round 2 , .const_data_6, 2, .const_data_7
-	xtea_decrypt_do_vectorized_round 1 , .const_data_5, 3, .const_data_6
-	xtea_decrypt_do_vectorized_round 0 , .const_data_4, 0, .const_data_5
-	xtea_decrypt_do_vectorized_round 3 , .const_data_3, 0, .const_data_4
-	xtea_decrypt_do_vectorized_round 2 , .const_data_2, 1, .const_data_3
-	xtea_decrypt_do_vectorized_round 1 , .const_data_1, 2, .const_data_2
-	xtea_decrypt_do_vectorized_round 0 , .const_data_0, 3, .const_data_1
+	xtea_decrypt_do_vectorized_round 3, .const_data_31, 2, .const_data_32
+	xtea_decrypt_do_vectorized_round 2, .const_data_30, 3, .const_data_31
+	xtea_decrypt_do_vectorized_round 1, .const_data_29, 0, .const_data_30
+	xtea_decrypt_do_vectorized_round 0, .const_data_28, 1, .const_data_29
+	xtea_decrypt_do_vectorized_round 3, .const_data_27, 2, .const_data_28
+	xtea_decrypt_do_vectorized_round 2, .const_data_26, 2, .const_data_27
+	xtea_decrypt_do_vectorized_round 1, .const_data_25, 3, .const_data_26
+	xtea_decrypt_do_vectorized_round 0, .const_data_24, 0, .const_data_25
+	xtea_decrypt_do_vectorized_round 3, .const_data_23, 1, .const_data_24
+	xtea_decrypt_do_vectorized_round 2, .const_data_22, 1, .const_data_23
+	xtea_decrypt_do_vectorized_round 1, .const_data_21, 2, .const_data_22
+	xtea_decrypt_do_vectorized_round 0, .const_data_20, 3, .const_data_21
+	xtea_decrypt_do_vectorized_round 3, .const_data_19, 0, .const_data_20
+	xtea_decrypt_do_vectorized_round 2, .const_data_18, 1, .const_data_19
+	xtea_decrypt_do_vectorized_round 1, .const_data_17, 1, .const_data_18
+	xtea_decrypt_do_vectorized_round 0, .const_data_16, 2, .const_data_17
+	xtea_decrypt_do_vectorized_round 3, .const_data_15, 3, .const_data_16
+	xtea_decrypt_do_vectorized_round 2, .const_data_14, 0, .const_data_15
+	xtea_decrypt_do_vectorized_round 1, .const_data_13, 1, .const_data_14
+	xtea_decrypt_do_vectorized_round 0, .const_data_12, 1, .const_data_13
+	xtea_decrypt_do_vectorized_round 3, .const_data_11, 2, .const_data_12
+	xtea_decrypt_do_vectorized_round 2, .const_data_10, 3, .const_data_11
+	xtea_decrypt_do_vectorized_round 1, .const_data_9,  0, .const_data_10
+	xtea_decrypt_do_vectorized_round 0, .const_data_8,  0, .const_data_9
+	xtea_decrypt_do_vectorized_round 3, .const_data_7,  1, .const_data_8
+	xtea_decrypt_do_vectorized_round 2, .const_data_6,  2, .const_data_7
+	xtea_decrypt_do_vectorized_round 1, .const_data_5,  3, .const_data_6
+	xtea_decrypt_do_vectorized_round 0, .const_data_4,  0, .const_data_5
+	xtea_decrypt_do_vectorized_round 3, .const_data_3,  0, .const_data_4
+	xtea_decrypt_do_vectorized_round 2, .const_data_2,  1, .const_data_3
+	xtea_decrypt_do_vectorized_round 1, .const_data_1,  2, .const_data_2
+	xtea_decrypt_do_vectorized_round 0, .const_data_0,  3, .const_data_1
 
 	# Interleave back to original format
 	movdqa		xmm1, xmm13

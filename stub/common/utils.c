@@ -24,6 +24,8 @@
 
 static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr, uintptr_t end_vaddr, off_t off);
 
+static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges, uint64_t start_vaddr, uint64_t base);
+
 // ---
 // Extern function definitions
 // ---
@@ -121,7 +123,7 @@ void	skip_to_nl(char **s) {
 		++(*s);
 }
 
-void	decrypt(t_range *protected_ranges, uint64_t ranges_len) {
+void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_range *bss_ranges_ptr, uint64_t bss_ranges_len) {
 	char	*maps;
 	size_t	maps_size = read_maps(&maps);
 	uintptr_t	start_vaddr;
@@ -130,10 +132,9 @@ void	decrypt(t_range *protected_ranges, uint64_t ranges_len) {
 	const char	*self_path = get_self_path();
 	bool		is_self;
 	const t_ranges	ranges = {.data = protected_ranges, .len = ranges_len};
+	const t_ranges	bss_ranges = {.data = bss_ranges_ptr, .len = bss_ranges_len};
 	int	prev_perm = 0;
 
-	// ft_putstr("PARSING MAPPINGS\n");
-	// ft_putstr(maps);
 	while (*maps) {
 		prev_perm = 0;
 		start_vaddr = parse_hex(&maps);
@@ -162,12 +163,9 @@ void	decrypt(t_range *protected_ranges, uint64_t ranges_len) {
 		++maps;
 		if (!is_self)
 			continue ;
-		// ft_putstr("START VADDR: ");
-		// ft_puthex(start_vaddr);
-		// ft_putstr("END VADDR: ");
-		// ft_puthex(end_vaddr);
-		// ft_putstr("OFF: ");
-		// ft_puthex(off);
+		const uint64_t next_bss_off = _get_next_bss_off(&bss_ranges, start_vaddr, base);
+		if (next_bss_off != 0)
+			end_vaddr = MIN(next_bss_off, end_vaddr);
 		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, PROT_EXEC | PROT_WRITE | PROT_READ);
 		_decrypt_mapping(&ranges, start_vaddr, end_vaddr-1, off);
 		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, prev_perm);
@@ -183,17 +181,20 @@ void	decrypt(t_range *protected_ranges, uint64_t ranges_len) {
 // Static function definitions
 // ---
  
+static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges, uint64_t start_vaddr, uint64_t base) {
+	size_t vaddr = 0;
+	size_t k = 0;
+	while (k < bss_ranges->len && vaddr < start_vaddr) {
+		vaddr = bss_ranges->data[k].off + base;
+		++k;
+	}
+	return (vaddr);
+} 
+
 static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr, uintptr_t end_vaddr, off_t off) {
 	size_t	range_idx = 0;
 
-	// ft_putstr("=== 0x");
-	// ft_puthex(start_vaddr);
-	// ft_putstr(" => 0x");
-	// ft_puthex(end_vaddr);
-	// ft_putstr(" ===\n");
 	while (range_idx < ranges->len && ranges->data[range_idx].off < off) {
-		// ft_putstr("_decrypt_mapping starting range :");
-		// ft_puthex(range_idx);
 		++range_idx;
 	}
 	for (size_t k = MAX(1, range_idx); k < ranges->len; ++k) {

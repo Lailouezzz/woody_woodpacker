@@ -46,7 +46,7 @@ int	main(int argc, char **argv, char **envp) {
 		return (EXIT_FAILURE);
 
 	first_entry_index = s.hdl.eh.get.phnum(&s) + 1;
-	if (elf_manager_move_pht_and_emplace_entries(&s, 2))
+	if (elf_manager_move_pht_and_emplace_entries(&s, 3))
 		return (EXIT_FAILURE);
 
 	if (s.is_64) {
@@ -71,7 +71,10 @@ int	main(int argc, char **argv, char **envp) {
 }
 
 static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) {
+	t_ranges	bss_ranges = list_new();
 	if (!elf_get_protected_ranges(s, ranges))
+		return (1);
+	if (!elf_get_bss_vaddr_ranges(s, &bss_ranges))
 		return (1);
 
 	elf_append_loadable_data_and_locate(
@@ -87,22 +90,32 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 	elf_append_loadable_data_and_locate(
 		s,
 		ranges->data,
-		(ranges->len + 1) * sizeof(*ranges->data),
+		(ranges->len + 2) * sizeof(*ranges->data),
 		0x1000, 0x20, first_entry_index + 1,
 		PF_R
 	);
-	list_push(ranges, MAKE_RANGE(s->hdl.ph.get.offset(s, first_entry_index + 1), s->hdl.ph.get.filesz(s, first_entry_index + 1)));
-	range_aggregate(ranges);
 
-	t_range *last_range = s->data + s->hdl.ph.get.offset(s, first_entry_index + 1) + s->hdl.ph.get.memsz(s, first_entry_index + 1) - sizeof(t_range);
-	last_range->off = s->hdl.ph.get.offset(s, first_entry_index + 1);
-	last_range->len = (ranges->len + 1) * sizeof(t_range);
+	elf_append_loadable_data_and_locate(
+		s,
+		bss_ranges.data,
+		bss_ranges.len * sizeof(*bss_ranges.data),
+		0x1000, 0x20, first_entry_index + 2,
+		PF_R
+	);
+
+	t_range *last_ranges = s->data + s->hdl.ph.get.offset(s, first_entry_index + 1) + s->hdl.ph.get.memsz(s, first_entry_index + 1) - sizeof(t_range) * 2;
+	last_ranges[0].off = s->hdl.ph.get.offset(s, first_entry_index + 1);
+	last_ranges[0].len = (ranges->len + 2) * sizeof(t_range);
+	last_ranges[1].off = s->hdl.ph.get.offset(s, first_entry_index + 2);
+	last_ranges[1].len = bss_ranges.len * sizeof(t_range);
 
 	t_stub_64_data *stub_data = s->data + s->hdl.ph.get.offset(s, first_entry_index) + s->hdl.ph.get.memsz(s, first_entry_index) - sizeof(t_stub_64_data);
 	stub_data->stub_virt_off = s->hdl.ph.get.vaddr(s, first_entry_index);
 	stub_data->entry_point = s->hdl.eh.get.entry(s);
 	stub_data->ranges_ptr = (uint64_t)s->hdl.ph.get.vaddr(s, first_entry_index + 1);
-	stub_data->ranges_len = ranges->len + 1;
+	stub_data->ranges_len = ranges->len + 2;
+	stub_data->bss_ranges_ptr = (uint64_t)s->hdl.ph.get.vaddr(s, first_entry_index + 2);
+	stub_data->bss_ranges_len = bss_ranges.len;
 
 	s->hdl.eh.set.entry(s, s->hdl.ph.get.vaddr(s, first_entry_index));
 	verbose("stub is off: 0x%llx, len: 0x%llx\n", s->hdl.ph.get.offset(s, first_entry_index), s->hdl.ph.get.filesz(s, first_entry_index));
@@ -110,7 +123,10 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 }
 
 static int	_inject32(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) {
+	t_ranges	bss_ranges = list_new();
 	if (!elf_get_protected_ranges(s, ranges))
+		return (1);
+	if (!elf_get_bss_vaddr_ranges(s, &bss_ranges))
 		return (1);
 
 	elf_append_loadable_data_and_locate(
@@ -126,25 +142,34 @@ static int	_inject32(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 	elf_append_loadable_data_and_locate(
 		s,
 		ranges->data,
-		(ranges->len + 1) * sizeof(*ranges->data),
+		(ranges->len + 2) * sizeof(*ranges->data),
 		0x1000, 0x20, first_entry_index + 1,
 		PF_R
 	);
-	list_push(ranges, MAKE_RANGE(s->hdl.ph.get.offset(s, first_entry_index + 1), s->hdl.ph.get.filesz(s, first_entry_index + 1)));
-	range_aggregate(ranges);
 
-	t_range *last_range = s->data + s->hdl.ph.get.offset(s, first_entry_index + 1) + s->hdl.ph.get.memsz(s, first_entry_index + 1) - sizeof(t_range);
-	last_range->off = s->hdl.ph.get.offset(s, first_entry_index + 1);
-	last_range->len = (ranges->len + 1) * sizeof(t_range);
+	elf_append_loadable_data_and_locate(
+		s,
+		bss_ranges.data,
+		bss_ranges.len * sizeof(*bss_ranges.data),
+		0x1000, 0x20, first_entry_index + 2,
+		PF_R
+	);
+
+	t_range *last_ranges = s->data + s->hdl.ph.get.offset(s, first_entry_index + 1) + s->hdl.ph.get.memsz(s, first_entry_index + 1) - sizeof(t_range) * 2;
+	last_ranges[0].off = s->hdl.ph.get.offset(s, first_entry_index + 1);
+	last_ranges[0].len = (ranges->len + 2) * sizeof(t_range);
+	last_ranges[1].off = s->hdl.ph.get.offset(s, first_entry_index + 2);
+	last_ranges[1].len = bss_ranges.len * sizeof(t_range);
 
 	t_stub_32_data *stub_data = s->data + s->hdl.ph.get.offset(s, first_entry_index) + s->hdl.ph.get.memsz(s, first_entry_index) - sizeof(t_stub_32_data);
 	stub_data->stub_virt_off = s->hdl.ph.get.vaddr(s, first_entry_index);
 	stub_data->entry_point = s->hdl.eh.get.entry(s);
-	stub_data->ranges_ptr = (uintptr_t)s->hdl.ph.get.vaddr(s, first_entry_index + 1);
-	stub_data->ranges_len = ranges->len + 1;
+	stub_data->ranges_ptr = s->hdl.ph.get.vaddr(s, first_entry_index + 1);
+	stub_data->ranges_len = ranges->len + 2;
+	stub_data->bss_ranges_ptr = s->hdl.ph.get.vaddr(s, first_entry_index + 2);
+	stub_data->bss_ranges_len = bss_ranges.len;
 
 	s->hdl.eh.set.entry(s, s->hdl.ph.get.vaddr(s, first_entry_index));
-	verbose("stub is off: 0x%llx, len: 0x%llx\n", s->hdl.ph.get.offset(s, first_entry_index), s->hdl.ph.get.filesz(s, first_entry_index));
 	return (0);
 }
 

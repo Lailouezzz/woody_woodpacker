@@ -25,6 +25,11 @@ static bool	_add_ph_to_range(
 				size_t ph_index
 				);
 
+static bool	_add_bss_to_range(
+				t_ranges *ranges,
+				const t_elf_file *elf
+				);
+
 static bool _add_dyn_to_range(
 				t_ranges *ranges,
 				const t_elf_file *elf,
@@ -95,6 +100,22 @@ bool	elf_get_protected_ranges(
 	return (true);
 }
 
+bool	elf_get_bss_vaddr_ranges(
+			const t_elf_file *elf,
+			t_ranges *ranges
+			) {
+	for (size_t k = 0; k < elf->hdl.eh.get.phnum(elf); ++k) {
+		auto const filesz = elf->hdl.ph.get.filesz(elf, k);
+		auto const memsz = elf->hdl.ph.get.memsz(elf, k);
+		if (filesz >= memsz || elf->hdl.ph.get.type(elf, k) != PT_LOAD)
+			continue ;
+		auto const vaddr = elf->hdl.ph.get.vaddr(elf, k);
+		if (!list_push(ranges, MAKE_RANGE(vaddr + filesz, memsz - filesz)))
+			return (false);
+	}
+	return (true);
+}
+
 // ---
 // Static function definitions
 // ---
@@ -134,6 +155,8 @@ static bool	_elf_get_protected_ranges(
 		return (false);
 	if (!_add_dyn_to_range(ranges, elf, pt_dyn_idx))
 		return (false);
+	if (!_add_bss_to_range(ranges, elf))
+		return (false);
 	return (true);
 }
 
@@ -170,6 +193,25 @@ static bool	_add_ph_to_range(
 	auto const	p_offset = elf->hdl.ph.get.offset(elf, ph_index);
 	auto const	p_filesz = elf->hdl.ph.get.filesz(elf, ph_index);
 	return list_push(ranges, MAKE_RANGE(p_offset, p_filesz));
+}
+
+static bool	_add_bss_to_range(
+				t_ranges *ranges,
+				const t_elf_file *elf
+				) {
+	for (size_t k = 0; k < elf->hdl.eh.get.phnum(elf); ++k) {
+		auto const filesz = elf->hdl.ph.get.filesz(elf, k);
+		auto const memsz = elf->hdl.ph.get.memsz(elf, k);
+		if (filesz >= memsz)
+			continue ;
+		auto const offset = elf->hdl.ph.get.offset(elf, k);
+		if ((offset + filesz) % 4 == 0)
+			return (false);
+		auto const down_addr = ALIGN_DOWN(offset + filesz, 4);
+		if (!list_push(ranges, MAKE_RANGE(down_addr, 4)))
+			return (false);
+	}
+	return (true);
 }
 
 static bool	_add_dyn_to_range(
@@ -250,6 +292,12 @@ static bool	_add_dyn_to_range(
 	if (dyn.relr && dyn.relrsz) {
 		uint64_t off = elf_vaddr_to_offset(elf, dyn.relr);
 		if (off && !list_push(ranges, MAKE_RANGE(off, dyn.relrsz)))
+			return (false);
+	}
+
+	if (dyn.pltgot) {
+		uint64_t off = elf_vaddr_to_offset(elf, dyn.pltgot);
+		if (!list_push(ranges, MAKE_RANGE(off, ptr_size * 3)))
 			return (false);
 	}
 

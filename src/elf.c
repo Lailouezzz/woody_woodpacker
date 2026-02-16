@@ -115,7 +115,6 @@ int		elf_manager_move_pht_and_emplace_entries(
 	pht_vaddr = ALIGN_UP(s->next_available_vaddr + 1, 0x1000UL);
 	pht_vaddr += pht_pos % 0x1000;
 
-
 	if (phdr_index < num)
 	{
 		s->hdl.ph.set.vaddr(s,phdr_index, pht_vaddr);

@@ -1,3 +1,8 @@
+/**
+ * @file utils.c
+ * @brief Runtime decryption utilities for the stub.
+ */
+
 // ---
 // Includes
 // ---
@@ -22,51 +27,110 @@
 // Static function declarations
 // ---
 
-static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr, uintptr_t end_vaddr, off_t off);
+static const char	*_get_self_path();
 
-static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges, uint64_t start_vaddr, uint64_t base);
+static size_t		_read_maps(
+						char **buf
+						);
+
+static uint64_t		_parse_hex(
+						char **s
+						);
+
+static void		_skip_spaces(
+					char **s
+					);
+
+static void		_skip_to_nl(
+					char **s
+					);
+
+static bool		_parse_maps_line(
+					char **maps,
+					const char *self_path,
+					uintptr_t *start,
+					uintptr_t *end,
+					uint64_t *off,
+					int *perm
+					);
+
+static void		_decrypt_mapping(
+					const t_ranges *ranges,
+					uintptr_t start_vaddr,
+					uintptr_t end_vaddr,
+					off_t off);
+
+static uint64_t		_get_next_bss_off(
+						const t_ranges *bss_ranges,
+						uint64_t start_vaddr,
+						uint64_t base
+						);
 
 // ---
 // Extern function definitions
 // ---
 
-const char	*get_self_path() {
+/**
+ * @brief Decrypt all self-mappings using protected ranges.
+ * @param base Base address of the loaded binary.
+ * @param protected_ranges Array of ranges to skip during decryption.
+ * @param ranges_len Number of protected ranges.
+ * @param bss_ranges_ptr Array of BSS ranges (unmapped memory).
+ * @param bss_ranges_len Number of BSS ranges.
+ */
+void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len,
+		t_range *bss_ranges_ptr, uint64_t bss_ranges_len)
+{
+	char		*maps;
+	void		*_maps;
+	size_t		maps_size = _read_maps(&maps);
+	uintptr_t	start_vaddr;
+	uintptr_t	end_vaddr;
+	uint64_t	off;
+	const char	*self_path = _get_self_path();
+	int		prev_perm;
+	const t_ranges	ranges = {.data = protected_ranges, .len = ranges_len};
+	const t_ranges	bss_ranges = {.data = bss_ranges_ptr, .len = bss_ranges_len};
+
+	_maps = maps;
+	while (*maps) {
+		if (!_parse_maps_line(&maps, self_path, &start_vaddr, &end_vaddr,
+			&off, &prev_perm))
+			continue;
+		const uint64_t next_bss_off = _get_next_bss_off(&bss_ranges,
+			start_vaddr, base);
+		mprotect((void *)start_vaddr, end_vaddr - start_vaddr,
+			PROT_EXEC | PROT_WRITE | PROT_READ);
+		_decrypt_mapping(&ranges, start_vaddr,
+			(next_bss_off != 0 ? MIN(next_bss_off, end_vaddr) : end_vaddr) - 1,
+			off);
+		mprotect((void *)start_vaddr, end_vaddr - start_vaddr, prev_perm);
+	}
+
+	munmap(_maps, maps_size);
+}
+
+// ---
+// Static function definitions
+// ---
+
+/** @brief Get the path to the current executable. */
+static const char	*_get_self_path(void)
+{
 	static char	buf[0x1000] = {0};
 	return readlink("/proc/self/exe", buf, sizeof(buf)) > 0 ? buf : "UNK";
 }
 
-int	fgetchar(int fd) {
-	char	c;
-	auto ret = read(fd, &c, 1);
-	if (ret <= 0) {
-		return -1;
-	}
-	return c;
-}
-
-uint64_t	fgethex(int fd) {
-	int hex;
-	uint64_t nb = 0;
-	hex = fgetchar(fd);
-	while (ishex(hex)) {
-		nb <<= 4;
-		if (hex >= '0' && hex <= '9') {
-			nb += hex - '0';
-		} else {
-			nb += hex - 'a' + 10;
-		}
-		hex = fgetchar(fd);
-	}
-	return nb;
-}
-
-size_t	read_maps(char **buf) {
+/** @brief Read /proc/self/maps into a buffer. */
+static size_t	_read_maps(char **buf)
+{
 	int	fd = open("/proc/self/maps", O_RDONLY);
 	size_t	size = 0x1000;
-	*buf = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	*buf = mmap(nullptr, size, PROT_READ | PROT_WRITE,
+		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	size_t	off = 0;
 	ssize_t	ret;
-	while ((ret = read(fd, (char *)*buf+off, 0x1000)) != 0) {
+	while ((ret = read(fd, (char *)*buf + off, 0x1000)) != 0) {
 		off += ret;
 		if (off + 0x1000 > size) {
 			*buf = mremap(*buf, size, size + 0x1000, MREMAP_MAYMOVE);
@@ -76,118 +140,87 @@ size_t	read_maps(char **buf) {
 	close(fd);
 	if (ret < 0)
 		return 0;
-	((char *)*buf)[off+ret] = '\0';
+	((char *)*buf)[off + ret] = '\0';
 	return size;
 }
 
-uint64_t	parse_hex(char **s) {
+/** @brief Parse a hexadecimal number from string. */
+static uint64_t	_parse_hex(char **s)
+{
 	uint64_t nb = 0;
 	while (ishex(**s)) {
 		nb <<= 4;
-		if (**s >= '0' && **s <= '9') {
+		if (**s >= '0' && **s <= '9')
 			nb += **s - '0';
-		} else {
+		else
 			nb += **s - 'a' + 10;
-		}
 		++(*s);
 	}
 	return nb;
 }
 
-void	ft_putstr(const char *s) {
-	while (*s) {
-		write(STDOUT_FILENO, s++, 1);
-	}
-}
-
-void	ft_putline(const char *s) {
-	while (*s && *s != '\n') {
-		write(STDOUT_FILENO, s++, 1);
-	}
-}
-
-void	ft_puthex(uint64_t nb) {
-	char	buf[2 * sizeof(nb)] = {0};
-	int i = sizeof(buf) - 1;
-	buf[i] = '0';
-	while (nb != 0) {
-		if (nb % 16 < 10) {
-			buf[i--] = nb % 16 + '0';
-		} else {
-			buf[i--] = nb % 16 + 'a' - 10;
-		}
-		nb /= 16;
-	}
-	write(STDOUT_FILENO, &buf[i], sizeof(buf)-i);
-}
-
-void	skip_spaces(char **s) {
+/** @brief Skip whitespace characters. */
+static void	_skip_spaces(char **s)
+{
 	while (**s == ' ' || **s == '\t')
 		++(*s);
 }
 
-void	skip_to_nl(char **s) {
+/** @brief Skip to the next newline. */
+static void	_skip_to_nl(char **s)
+{
 	while (**s != '\n' && **s)
 		++(*s);
 }
 
-void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_range *bss_ranges_ptr, uint64_t bss_ranges_len) {
-	char	*maps;
-	void	*_maps;
-	size_t	maps_size = read_maps(&maps);
-	uintptr_t	start_vaddr;
-	uintptr_t	end_vaddr;
-	uint64_t	off;
-	const char	*self_path = get_self_path();
-	bool		is_self;
-	const t_ranges	ranges = {.data = protected_ranges, .len = ranges_len};
-	const t_ranges	bss_ranges = {.data = bss_ranges_ptr, .len = bss_ranges_len};
-	int	prev_perm = 0;
+/**
+ * @brief Parse a single line from /proc/self/maps.
+ * @param maps Pointer to current position in maps buffer (updated).
+ * @param self_path Path to current executable.
+ * @param start Output: start virtual address.
+ * @param end Output: end virtual address.
+ * @param off Output: file offset.
+ * @param perm Output: memory permissions (PROT_*).
+ * @return true if this line matches self_path, false otherwise.
+ */
+static bool	_parse_maps_line(char **maps, const char *self_path,
+			uintptr_t *start, uintptr_t *end, uint64_t *off, int *perm)
+{
+	bool	is_self;
 
-	_maps = maps;
-	while (*maps) {
-		prev_perm = 0;
-		start_vaddr = parse_hex(&maps);
-		++maps; // -
-		end_vaddr = parse_hex(&maps);
-		skip_spaces(&maps);
-		if (*maps != '-')
-			prev_perm |= PROT_READ;
-		if (*(++maps) != '-')
-			prev_perm |= PROT_WRITE;
-		if (*(++maps) != '-')
-			prev_perm |= PROT_EXEC;
-		maps += 2;
-		skip_spaces(&maps);
-		off = parse_hex(&maps);
-		skip_spaces(&maps);
-		parse_hex(&maps);
-		++maps;
-		parse_hex(&maps);
-		skip_spaces(&maps);
-		parse_hex(&maps);
-		skip_spaces(&maps);
-		// HERE IS THE PATH
-		is_self = memcmp(maps, self_path, strlen(self_path)) == 0 && maps[strlen(self_path)] == '\n';
-		skip_to_nl(&maps);
-		++maps;
-		if (!is_self)
-			continue ;
-		const uint64_t next_bss_off = _get_next_bss_off(&bss_ranges, start_vaddr, base);
-		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, PROT_EXEC | PROT_WRITE | PROT_READ);
-		_decrypt_mapping(&ranges, start_vaddr, (next_bss_off != 0 ? MIN(next_bss_off, end_vaddr) : end_vaddr)-1, off);
-		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, prev_perm);
-	}
-
-	munmap(_maps, maps_size);
+	*perm = 0;
+	*start = _parse_hex(maps);
+	++(*maps); // skip '-'
+	*end = _parse_hex(maps);
+	_skip_spaces(maps);
+	if (**maps != '-')
+		*perm |= PROT_READ;
+	if (*(++(*maps)) != '-')
+		*perm |= PROT_WRITE;
+	if (*(++(*maps)) != '-')
+		*perm |= PROT_EXEC;
+	*maps += 2;
+	_skip_spaces(maps);
+	*off = _parse_hex(maps);
+	_skip_spaces(maps);
+	_parse_hex(maps); // dev major
+	++(*maps); // skip ':'
+	_parse_hex(maps); // dev minor
+	_skip_spaces(maps);
+	_parse_hex(maps); // inode
+	_skip_spaces(maps);
+	// Check if path matches self
+	is_self = memcmp(*maps, self_path, strlen(self_path)) == 0
+		&& (*maps)[strlen(self_path)] == '\n';
+	_skip_to_nl(maps);
+	++(*maps);
+	return is_self;
 }
 
-
-// ---
-// Static function definitions
-// ---
- 
-static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges, uint64_t start_vaddr, uint64_t base) {
+/** @brief Get the next BSS offset after start_vaddr. */
+static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges,
+			uint64_t start_vaddr, uint64_t base)
+{
 	size_t vaddr = 0;
 	size_t k = 0;
 	while (k < bss_ranges->len && vaddr < start_vaddr) {
@@ -195,23 +228,33 @@ static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges, uint64_t start_vad
 		++k;
 	}
 	if (vaddr < start_vaddr)
-		return (0);
-	return (vaddr);
-} 
+		return 0;
+	return vaddr;
+}
 
-static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr, uintptr_t end_vaddr, off_t off) {
+/** @brief Decrypt a single memory mapping between protected ranges. */
+static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr,
+			uintptr_t end_vaddr, off_t off)
+{
 	size_t	range_idx = 0;
 
-	while (range_idx < ranges->len && ranges->data[range_idx].off < off) {
+	while (range_idx < ranges->len && ranges->data[range_idx].off < off)
 		++range_idx;
-	}
 	for (size_t k = MAX(1, range_idx); k < ranges->len; ++k) {
-		auto const	begin_vaddr = MAX(start_vaddr, ALIGN_UP(ranges->data[k - 1].off + ranges->data[k - 1].len - 1, 8) + start_vaddr - off);
+		auto const begin_vaddr = MAX(start_vaddr,
+			ALIGN_UP(ranges->data[k - 1].off + ranges->data[k - 1].len - 1, 8)
+			+ start_vaddr - off);
 		if (begin_vaddr > end_vaddr)
-			return ;
-		auto const	size = MIN(((off_t)ALIGN_DOWN(ranges->data[k].off, 8)) - (begin_vaddr - start_vaddr) - off, end_vaddr - begin_vaddr + 1);
-		if (size == 0 || ALIGN_UP(ranges->data[k - 1].off + ranges->data[k - 1].len - 1, 8) >= ALIGN_DOWN(ranges->data[k].off, 8))
-			continue ;
-		xtea_decrypt((void*)(uintptr_t)begin_vaddr, size, (const uint32_t *)"1234567812345678");
+			return;
+		auto const size = MIN(
+			((off_t)ALIGN_DOWN(ranges->data[k].off, 8))
+			- (begin_vaddr - start_vaddr) - off,
+			end_vaddr - begin_vaddr + 1);
+		if (size == 0 || ALIGN_UP(ranges->data[k - 1].off
+			+ ranges->data[k - 1].len - 1, 8)
+			>= ALIGN_DOWN(ranges->data[k].off, 8))
+			continue;
+		xtea_decrypt((void *)(uintptr_t)begin_vaddr, size,
+			(const uint32_t *)"1234567812345678");
 	}
 }

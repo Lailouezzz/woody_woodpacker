@@ -257,6 +257,8 @@ xtea_encrypt:
 	push		rbp
 	push		r15
 	push		r14
+	push		r13
+	push		r12
 	push		rbx
 	mov			r8, rsi
 	shr			r8, 3
@@ -329,6 +331,8 @@ xtea_encrypt:
 
 .xtea_encrypt_cleanup:
 	pop			rbx
+	pop			r12
+	pop			r13
 	pop			r14
 	pop			r15
 	pop			rbp

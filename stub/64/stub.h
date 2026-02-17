@@ -1,46 +1,40 @@
-#ifndef  STUB_64_STUB_H
-# define STUB_64_STUB_H
+/**
+ * @file stub.h
+ * @brief 64-bit stub declarations.
+ */
+
+#ifndef STUB_64_STUB_H
+#define STUB_64_STUB_H
 
 // ---
 // Includes
 // ---
 
-# include <stdint.h>
-# include "stub_def.h"
-
-// ---
-// Defines
-// ---
-
-// ---
-// Typedefs
-// ---
+#include <stdint.h>
+#include "stub_def.h"
+#include "protect_range.h"
 
 // ---
 // Global variables
 // ---
 
+/** @brief Stub data populated by the packer. */
 __attribute__((section(".stub.data")))
 extern t_stub_64_data	g_stub_data;
 
 // ---
-// Function declartions
+// Function declarations
 // ---
 
-const char	*get_self_path();
-
-int	fgetchar(int fd);
-
-uint64_t	fgethex(int fd);
-
-size_t	read_maps(char **buf);
-
-void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_range *bss_ranges_ptr, uint64_t bss_ranges_len);
-
-void	ft_putstr(const char *s);
-
-void	ft_puthex(uint64_t nb);
-
-void	ft_putnbr(uint64_t nb);
+/**
+ * @brief Decrypt all self-mappings using protected ranges.
+ * @param base Base address of the loaded binary.
+ * @param protected_ranges Array of ranges to skip during decryption.
+ * @param ranges_len Number of protected ranges.
+ * @param bss_ranges_ptr Array of BSS ranges (unmapped memory).
+ * @param bss_ranges_len Number of BSS ranges.
+ */
+void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len,
+	    t_range *bss_ranges_ptr, uint64_t bss_ranges_len);
 
 #endif

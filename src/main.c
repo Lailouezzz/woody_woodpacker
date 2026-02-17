@@ -14,10 +14,10 @@ static noreturn void	print_usage();
 static int				_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges);
 static int				_inject32(t_elf_file *s, size_t first_entry_index, t_ranges *ranges);
 
-extern char _binary_ressources_stub64_bin_start[];
-extern char _binary_ressources_stub64_bin_end[];
-extern char _binary_ressources_stub32_bin_start[];
-extern char _binary_ressources_stub32_bin_end[];
+extern char _binary_resources_stub64_bin_start[];
+extern char _binary_resources_stub64_bin_end[];
+extern char _binary_resources_stub32_bin_start[];
+extern char _binary_resources_stub32_bin_end[];
 
 int	main(int argc, char **argv, char **envp) {
 	UNUSED(envp);
@@ -56,7 +56,6 @@ int	main(int argc, char **argv, char **envp) {
 		if (_inject32(&s, first_entry_index, &ranges))
 			return (EXIT_FAILURE);
 	}
-
 	for (size_t k = 0; k < ranges.len - 1 && ranges.len != 0; ++k) {
 		auto const	start_off = ALIGN_UP(ranges.data[k].off + ranges.data[k].len - 1, 8);
 		auto const	size = MIN(((off_t)ALIGN_DOWN(ranges.data[k + 1].off, 8)) - (off_t)start_off, (off_t)(s.size - start_off));
@@ -79,8 +78,8 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 
 	elf_append_loadable_data_and_locate(
 		s,
-		_binary_ressources_stub64_bin_start,
-		_binary_ressources_stub64_bin_end - _binary_ressources_stub64_bin_start,
+		_binary_resources_stub64_bin_start,
+		_binary_resources_stub64_bin_end - _binary_resources_stub64_bin_start,
 		0x1000, 0x20, first_entry_index,
 		PF_X | PF_R | PF_W
 	);
@@ -131,8 +130,8 @@ static int	_inject32(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 
 	elf_append_loadable_data_and_locate(
 		s,
-		_binary_ressources_stub32_bin_start,
-		_binary_ressources_stub32_bin_end - _binary_ressources_stub32_bin_start,
+		_binary_resources_stub32_bin_start,
+		_binary_resources_stub32_bin_end - _binary_resources_stub32_bin_start,
 		0x1000, 0x20, first_entry_index,
 		PF_X | PF_R | PF_W
 	);

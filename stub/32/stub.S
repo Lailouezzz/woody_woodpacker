@@ -7,37 +7,31 @@
 .section .stub.init
 
 _start:
-	# Sauvegarder les registres importants
-	push edx
-	push ebp
+	push 0 # ret placeholder
+	pushad
+	pushfd
 
-	# Appeler stub_main (convention cdecl : retourne dans eax)
+	sub esp, 8
 	call stub_main
+	add esp, 8
+	mov [esp + 36], eax
 
-	# Sauvegarder le point d'entrée retourné
-	push eax
+	call .L_get_pc1
+.L_get_pc1:
+	pop ecx
+	add ecx, (msg - .L_get_pc1)
+	mov eax, 4 # SYS_WRITE
+	mov ebx, 1 # fd stdout
+	mov edx, 12 # size
+	int 0x80
 
-	# Afficher "___WOODY___\n" avec syscall write (32 bits)
-	# sys_write = 4, stdout = 1
-	# eax = syscall number, ebx = fd, ecx = buf, edx = count
+	popfd
+	popad
+	ret
 
-	# Obtenir l'adresse de msg en PIC (trick call/pop)
-	call .get_pc
-.get_pc:
-	pop ecx                    # ecx = adresse de cette instruction
-	add ecx, (msg - .get_pc)   # ecx = adresse de msg
-
-	mov eax, 4                 # sys_write
-	mov ebx, 1                 # stdout
-	# ecx contient déjà l'adresse de msg
-	mov edx, 12                # taille
-	int 0x80                   # syscall 32 bits
-
-	# Restaurer et sauter au point d'entrée original
-	pop eax
-	pop ebp
-	pop edx
-	jmp eax
+.section .data
+entry_point:
+	.long 0
 
 .section .rodata
 msg:

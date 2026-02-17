@@ -133,7 +133,7 @@ $(OBJDIR)/xtea_crypt_32.S.o: stub/32/xtea_crypt_32.S
 	$(call qcmd,$(MKDIR) -p $(@D))
 	$(call bcmd,as,$<,$(AS) $(ASFLAGS) $< -o $@)
 
-# Make object ressources
+# Make object resources
 
 $(OBJDIR)/%.res.o: $(RESDIR)/%
 	$(call qcmd,$(MKDIR) -p $(@D))

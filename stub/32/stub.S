@@ -7,6 +7,7 @@
 .section .stub.init
 
 _start:
+	and esp, ~0xf
 	push 0 # ret placeholder
 	pushad
 	pushfd

@@ -205,10 +205,10 @@ static bool	_add_bss_to_range(
 		if (filesz >= memsz)
 			continue ;
 		auto const offset = elf->hdl.ph.get.offset(elf, k);
-		if ((offset + filesz) % 4 == 0)
+		if ((offset + filesz) % 8 == 0)
 			continue ;
-		auto const down_addr = ALIGN_DOWN(offset + filesz, 4);
-		if (!list_push(ranges, MAKE_RANGE(down_addr, 4)))
+		auto const down_addr = ALIGN_DOWN(offset + filesz, 8);
+		if (!list_push(ranges, MAKE_RANGE(down_addr, 8)))
 			return (false);
 	}
 	return (true);

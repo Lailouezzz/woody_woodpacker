@@ -66,10 +66,12 @@ size_t	read_maps(char **buf) {
 	*buf = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	size_t	off = 0;
 	ssize_t	ret;
-	while ((ret = read(fd, (char *)*buf+off, 0x1000)) == 0x1000) {
-		*buf = mremap(*buf, size, size + 0x1000, MREMAP_MAYMOVE);
-		size += 0x1000;
-		off += 0x1000;
+	while ((ret = read(fd, (char *)*buf+off, 0x1000)) != 0) {
+		off += ret;
+		if (off + 0x1000 > size) {
+			*buf = mremap(*buf, size, size + 0x1000, MREMAP_MAYMOVE);
+			size += 0x1000;
+		}
 	}
 	close(fd);
 	if (ret < 0)
@@ -131,6 +133,7 @@ void	skip_to_nl(char **s) {
 
 void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_range *bss_ranges_ptr, uint64_t bss_ranges_len) {
 	char	*maps;
+	void	*_maps;
 	size_t	maps_size = read_maps(&maps);
 	uintptr_t	start_vaddr;
 	uintptr_t	end_vaddr;
@@ -141,6 +144,7 @@ void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_r
 	const t_ranges	bss_ranges = {.data = bss_ranges_ptr, .len = bss_ranges_len};
 	int	prev_perm = 0;
 
+	_maps = maps;
 	while (*maps) {
 		prev_perm = 0;
 		start_vaddr = parse_hex(&maps);
@@ -170,14 +174,12 @@ void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len, t_r
 		if (!is_self)
 			continue ;
 		const uint64_t next_bss_off = _get_next_bss_off(&bss_ranges, start_vaddr, base);
-		if (next_bss_off != 0)
-			end_vaddr = MIN(next_bss_off, end_vaddr);
 		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, PROT_EXEC | PROT_WRITE | PROT_READ);
-		_decrypt_mapping(&ranges, start_vaddr, end_vaddr-1, off);
+		_decrypt_mapping(&ranges, start_vaddr, (next_bss_off != 0 ? MIN(next_bss_off, end_vaddr) : end_vaddr)-1, off);
 		mprotect((void*)start_vaddr, end_vaddr - start_vaddr, prev_perm);
 	}
 
-	munmap(maps, maps_size);
+	munmap(_maps, maps_size);
 }
 
 

@@ -71,11 +71,17 @@ int	main(int argc, char **argv, char **envp) {
 
 static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) {
 	t_ranges	bss_ranges = list_new();
+	verbose("getting protected ranges...");
 	if (!elf_get_protected_ranges(s, ranges))
 		return (1);
+	verbose("%zu found !\n", ranges->len);
+	verbose("getting bss ranges...");
 	if (!elf_get_bss_vaddr_ranges(s, &bss_ranges))
 		return (1);
+	verbose("%zu found !\n", bss_ranges.len);
 
+
+	verbose("append stub64...");
 	elf_append_loadable_data_and_locate(
 		s,
 		_binary_resources_stub64_bin_start,
@@ -83,9 +89,11 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 		0x1000, 0x20, first_entry_index,
 		PF_X | PF_R | PF_W
 	);
+	verbose("done !\n");
 	list_push(ranges, MAKE_RANGE(s->hdl.ph.get.offset(s, first_entry_index), s->hdl.ph.get.filesz(s, first_entry_index)));
 	range_aggregate(ranges);
 
+	verbose("append protected ranges...");
 	elf_append_loadable_data_and_locate(
 		s,
 		ranges->data,
@@ -93,7 +101,9 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 		0x1000, 0x20, first_entry_index + 1,
 		PF_R
 	);
+	verbose("done !\n");
 
+	verbose("append bss ranges...");
 	elf_append_loadable_data_and_locate(
 		s,
 		bss_ranges.data,
@@ -101,13 +111,17 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 		0x1000, 0x20, first_entry_index + 2,
 		PF_R
 	);
+	verbose("done !\n");
 
+	verbose("editing last_ranges...");
 	t_range *last_ranges = s->data + s->hdl.ph.get.offset(s, first_entry_index + 1) + s->hdl.ph.get.memsz(s, first_entry_index + 1) - sizeof(t_range) * 2;
 	last_ranges[0].off = s->hdl.ph.get.offset(s, first_entry_index + 1);
 	last_ranges[0].len = (ranges->len + 2) * sizeof(t_range);
 	last_ranges[1].off = s->hdl.ph.get.offset(s, first_entry_index + 2);
 	last_ranges[1].len = bss_ranges.len * sizeof(t_range);
+	verbose("done !\n");
 
+	verbose("editing stub_data...");
 	t_stub_64_data *stub_data = s->data + s->hdl.ph.get.offset(s, first_entry_index) + s->hdl.ph.get.memsz(s, first_entry_index) - sizeof(t_stub_64_data);
 	stub_data->stub_virt_off = s->hdl.ph.get.vaddr(s, first_entry_index);
 	stub_data->entry_point = s->hdl.eh.get.entry(s);
@@ -115,6 +129,7 @@ static int	_inject64(t_elf_file *s, size_t first_entry_index, t_ranges *ranges) 
 	stub_data->ranges_len = ranges->len + 2;
 	stub_data->bss_ranges_ptr = (uint64_t)s->hdl.ph.get.vaddr(s, first_entry_index + 2);
 	stub_data->bss_ranges_len = bss_ranges.len;
+	verbose("done !\n");
 
 	s->hdl.eh.set.entry(s, s->hdl.ph.get.vaddr(s, first_entry_index));
 	verbose("stub is off: 0x%llx, len: 0x%llx\n", s->hdl.ph.get.offset(s, first_entry_index), s->hdl.ph.get.filesz(s, first_entry_index));

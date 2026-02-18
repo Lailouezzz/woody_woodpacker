@@ -34,7 +34,11 @@ extern t_stub_64_data	g_stub_data;
  * @param bss_ranges_ptr Array of BSS ranges (unmapped memory).
  * @param bss_ranges_len Number of BSS ranges.
  */
-void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len,
-	    t_range *bss_ranges_ptr, uint64_t bss_ranges_len);
+void	decrypt(
+			uintptr_t base,
+			t_range *protected_ranges,
+			uint64_t ranges_len,
+			t_range *bss_ranges_ptr,
+			uint64_t bss_ranges_len);
 
 #endif

@@ -48,27 +48,26 @@ int			elf_manager_load(
 				const char *path
 				)
 {
-	int		fd;
 	void	*src;
 
-	fd = open(path, O_RDONLY);
-	if (fd < 0)
+	s->fd = open(path, O_RDONLY);
+	if (s->fd < 0)
 	{
 		return (EXIT_FAILURE);
 	}
-	if (_get_size(fd, &s->size))
+	if (_get_size(s->fd, &s->size))
 	{
-		close(fd);
+		close(s->fd);
 		return (EXIT_FAILURE);
 	}
 	src = mmap(NULL,
 		s->size,
-		PROT_READ | PROT_WRITE,
+		PROT_READ,
 		MAP_PRIVATE,
-		fd,
+		s->fd,
 		0
 	);
-	close(fd);
+	close(s->fd);
 	if (src == MAP_FAILED)
 		return (EXIT_FAILURE);
 	s->data = mmap(NULL,
@@ -190,6 +189,19 @@ int		elf_manager_finalize(
 		return (EXIT_FAILURE);
 	if (munmap(s->data, s->size))
 		return (EXIT_FAILURE);
+	if (s->fd != 0)
+		close(s->fd);
+	return (EXIT_SUCCESS);
+}
+
+int		elf_manager_close(
+			t_elf_file *s
+			)
+{
+	if (s->fd != 0)
+		close(s->fd);
+	if (munmap(s->data, s->size))
+		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
 
@@ -245,6 +257,13 @@ bool		elf_ph_is_dynamic(
 				size_t ph_index
 				) {
 	return (s->hdl.ph.get.type(s, ph_index) == PT_DYNAMIC);
+}
+
+bool		elf_ph_is_interp(
+				const t_elf_file *s,
+				size_t ph_index
+				) {
+	return (s->hdl.ph.get.type(s, ph_index) == PT_INTERP);
 }
 
 static

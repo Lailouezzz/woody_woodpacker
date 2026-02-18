@@ -11,7 +11,6 @@
 // ---
 
 #include <stdint.h>
-#include "protect_range.h"
 
 // ---
 // Typedefs
@@ -30,6 +29,7 @@ typedef struct {
 	uint32_t	ranges_len;      /**< Number of protected ranges. */
 	uint32_t	bss_ranges_ptr;  /**< BSS ranges array vaddr. */
 	uint32_t	bss_ranges_len;  /**< Number of BSS ranges. */
+	int16_t		interp_idx;      /**< PHT index of the PT_INTERP, -1 if no interp */
 }	t_stub_32_data;
 
 #endif

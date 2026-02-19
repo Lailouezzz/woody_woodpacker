@@ -135,11 +135,16 @@ struct s_elf_file
 	t_elf_handler	hdl;
 	t_elf_io		io;
 	bool			is_64;
+	int				fd;
 };
 
 int			elf_manager_load(
 				t_elf_file *s,
 				const char *path
+				);
+
+int			elf_manager_close(
+				t_elf_file *s
 				);
 
 int			elf_manager_move_pht_and_emplace_entries(
@@ -168,6 +173,11 @@ int			elf_find_ph_index(
 				);
 
 bool		elf_ph_is_dynamic(
+				const t_elf_file *s,
+				size_t ph_index
+				);
+
+bool		elf_ph_is_interp(
 				const t_elf_file *s,
 				size_t ph_index
 				);

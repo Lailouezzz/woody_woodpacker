@@ -11,7 +11,6 @@
 // ---
 
 #include <stdint.h>
-#include "protect_range.h"
 
 // ---
 // Typedefs
@@ -23,13 +22,14 @@
  * This structure is embedded in the stub's .stub.data section and filled
  * at pack time with runtime decryption parameters.
  */
-typedef struct {
+typedef struct __attribute__((packed)) {
 	uint64_t	stub_virt_off;   /**< Stub's virtual address offset. */
 	uint64_t	entry_point;     /**< Original program entry point. */
 	uint64_t	ranges_ptr;      /**< Protected ranges array vaddr. */
 	uint64_t	ranges_len;      /**< Number of protected ranges. */
 	uint64_t	bss_ranges_ptr;  /**< BSS ranges array vaddr. */
 	uint64_t	bss_ranges_len;  /**< Number of BSS ranges. */
+	int16_t		interp_idx;      /**< PHT index of the PT_INTERP, -1 if no interp */
 }	t_stub_64_data;
 
 #endif

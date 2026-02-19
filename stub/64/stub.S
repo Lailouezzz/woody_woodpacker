@@ -45,7 +45,7 @@
 .section .stub.init
 
 _start:
-	and rsp, ~0xf
+	mov rdi, rsp
 	push 0 # ret placeholder
 	pushall
 	sub rsp, 8

@@ -242,19 +242,25 @@ static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr,
 		++range_idx;
 	for (size_t k = MAX(1, range_idx); k < ranges->len; ++k) {
 		auto const begin_vaddr = MAX(start_vaddr,
-			ALIGN_UP(ranges->data[k - 1].off + ranges->data[k - 1].len - 1, 8)
+			ALIGN_UP(ranges->data[k - 1].off + ranges->data[k - 1].len, 8)
 			+ start_vaddr - off);
-		if (begin_vaddr > end_vaddr)
+		if (begin_vaddr >= end_vaddr)
 			return;
 		auto const size = MIN(
 			((off_t)ALIGN_DOWN(ranges->data[k].off, 8))
 			- (begin_vaddr - start_vaddr) - off,
 			end_vaddr - begin_vaddr + 1);
 		if (size == 0 || ALIGN_UP(ranges->data[k - 1].off
-			+ ranges->data[k - 1].len - 1, 8)
+			+ ranges->data[k - 1].len, 8)
 			>= ALIGN_DOWN(ranges->data[k].off, 8))
 			continue;
 		xtea_decrypt((void *)(uintptr_t)begin_vaddr, size,
 			(const uint32_t *)"1234567812345678");
 	}
+	// After the last range
+	auto const begin_vaddr = MAX(start_vaddr, ALIGN_UP(ranges->data[ranges->len - 1].off + ranges->data[ranges->len - 1].len, 8) + start_vaddr - off);
+	if (begin_vaddr >= end_vaddr)
+		return ;
+	xtea_encrypt((void *)(uintptr_t)begin_vaddr,
+		end_vaddr - begin_vaddr + 1, (const uint32_t *)"1234567812345678");
 }

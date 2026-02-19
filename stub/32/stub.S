@@ -7,12 +7,13 @@
 .section .stub.init
 
 _start:
-	and esp, ~0xf
+	mov eax, esp
 	push 0 # ret placeholder
 	pushad
 	pushfd
 
-	sub esp, 8
+	sub esp, 4
+	push eax
 	call stub_main
 	add esp, 8
 	mov [esp + 36], eax

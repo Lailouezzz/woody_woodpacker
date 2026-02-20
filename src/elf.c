@@ -286,6 +286,9 @@ int			_validate_and_load(
 				)
 {
 	const Elf32_Ehdr	*ehdr = s->data;
+	size_t				phoff;
+	size_t				phnum;
+	size_t				phentsize;
 
 	ehdr = s->data;
 	if (s->size < EI_NIDENT)
@@ -304,6 +307,13 @@ int			_validate_and_load(
 		case 2: int_elf_load_be_raw_io(s); break ;
 		default: return (EXIT_FAILURE);
 	}
+	phoff = s->hdl.eh.get.phoff(s);
+	phnum = s->hdl.eh.get.phnum(s);
+	phentsize = s->hdl.eh.get.phentsize(s);
+	if (phentsize == 0 || phnum == 0)
+		return (EXIT_FAILURE);
+	if (phoff > s->size || phoff + phnum * phentsize > s->size)
+		return (EXIT_FAILURE);
 	s->next_available_vaddr = _get_next_available_vaddr(s);
 	return (EXIT_SUCCESS);
 }

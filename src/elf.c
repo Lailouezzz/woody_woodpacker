@@ -60,7 +60,7 @@ int			elf_manager_load(
 		close(s->fd);
 		return (EXIT_FAILURE);
 	}
-	src = mmap(NULL,
+	src = mmap(nullptr,
 		s->size,
 		PROT_READ,
 		MAP_PRIVATE,
@@ -69,7 +69,7 @@ int			elf_manager_load(
 	);
 	if (src == MAP_FAILED)
 		return (EXIT_FAILURE);
-	s->data = mmap(NULL,
+	s->data = mmap(nullptr,
 		s->size,
 		PROT_READ | PROT_WRITE,
 		MAP_PRIVATE | MAP_ANONYMOUS,

@@ -37,15 +37,15 @@
 /**
  * @brief Initialize an empty list.
  */
-# define list_new() { .data = NULL, .cap = 0, .len = 0 }
+# define list_new() { .data = nullptr, .cap = 0, .len = 0 }
 
 /**
  * @brief Free a list and reset its state.
  * @param l Pointer to the list.
  */
 # define list_free(l) do { \
-	if ((l)->data != NULL) free((l)->data); \
-	(l)->data = NULL; \
+	if ((l)->data != nullptr) free((l)->data); \
+	(l)->data = nullptr; \
 	(l)->cap = 0; \
 	(l)->len = 0; \
 } while (0)
@@ -58,11 +58,11 @@
  */
 # define list_reserve(l, capacity) ({ \
 	void *__tmp = realloc((l)->data, (capacity) * sizeof(*(l)->data)); \
-	if (__tmp != NULL) { \
+	if (__tmp != nullptr) { \
 		(l)->data = __tmp; \
 		(l)->cap = (capacity); \
 	} \
-	(__tmp != NULL); \
+	(__tmp != nullptr); \
 	})
 
 /**

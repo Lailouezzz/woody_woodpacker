@@ -58,7 +58,8 @@ static void		_decrypt_mapping(
 					const t_ranges *ranges,
 					uintptr_t start_vaddr,
 					uintptr_t end_vaddr,
-					off_t off);
+					off_t off,
+					const char *key);
 
 static uint64_t		_get_next_bss_off(
 						const t_ranges *bss_ranges,
@@ -79,7 +80,7 @@ static uint64_t		_get_next_bss_off(
  * @param bss_ranges_len Number of BSS ranges.
  */
 void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len,
-		t_range *bss_ranges_ptr, uint64_t bss_ranges_len)
+		t_range *bss_ranges_ptr, uint64_t bss_ranges_len, const char *key)
 {
 	char		*maps;
 	void		*_maps;
@@ -103,7 +104,7 @@ void	decrypt(uintptr_t base, t_range *protected_ranges, uint64_t ranges_len,
 			PROT_EXEC | PROT_WRITE | PROT_READ);
 		_decrypt_mapping(&ranges, start_vaddr,
 			(next_bss_off != 0 ? MIN(next_bss_off, end_vaddr) : end_vaddr) - 1,
-			off);
+			off, key);
 		mprotect((void *)start_vaddr, end_vaddr - start_vaddr, prev_perm);
 	}
 
@@ -234,7 +235,7 @@ static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges,
 
 /** @brief Decrypt a single memory mapping between protected ranges. */
 static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr,
-			uintptr_t end_vaddr, off_t off)
+			uintptr_t end_vaddr, off_t off, const char *key)
 {
 	size_t	range_idx = 0;
 
@@ -255,7 +256,7 @@ static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr,
 			>= ALIGN_DOWN(ranges->data[k].off, 8))
 			continue;
 		xtea_decrypt((void *)(uintptr_t)begin_vaddr, size,
-			(const uint32_t *)"1234567812345678");
+			(const uint32_t *)key);
 	}
 	// After the last range TODO: HANDLE FILE SIZE CHANGE AFTER PACKING
 	// auto const begin_vaddr = MAX(start_vaddr, ALIGN_UP(ranges->data[ranges->len - 1].off + ranges->data[ranges->len - 1].len, 8) + start_vaddr - off);

@@ -57,7 +57,7 @@ _start:
 	mov rax, 1
 	mov rdi, 1
 	lea rsi, [rip + msg]
-	mov rdx, 12
+	mov rdx, 14
 	syscall
 
 	popall
@@ -65,4 +65,4 @@ _start:
 
 .section .rodata
 msg:
-	.ascii "___WOODY___\n"
+	.ascii "....WOODY....\n"

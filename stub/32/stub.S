@@ -24,7 +24,7 @@ _start:
 	add ecx, (msg - .L_get_pc1)
 	mov eax, 4 # SYS_WRITE
 	mov ebx, 1 # fd stdout
-	mov edx, 12 # size
+	mov edx, 14 # size
 	int 0x80
 
 	popfd
@@ -37,4 +37,4 @@ entry_point:
 
 .section .rodata
 msg:
-	.ascii "___WOODY___\n"
+	.ascii "....WOODY....\n"

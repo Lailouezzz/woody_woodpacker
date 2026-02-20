@@ -146,7 +146,7 @@ run_test() {
 
     # Check for WOODY banner(s) - expect wrap_count banners
     local banner_count=0
-    banner_count=$(echo "$packed_output" | grep -cF "___WOODY___" || true)
+    banner_count=$(echo "$packed_output" | grep -cF "....WOODY...." || true)
     local has_banner=0
     if [ "$banner_count" -ge "$wrap_count" ]; then
         has_banner=1
@@ -250,7 +250,7 @@ run_test() {
 
     # Strict mode: compare output (remove all WOODY banners)
     local packed_clean
-    packed_clean=$(echo "$packed_output" | grep -vF "___WOODY___" || true)
+    packed_clean=$(echo "$packed_output" | grep -vF "....WOODY...." || true)
     local wrap_info=""
     if [ "$wrap_count" -gt 1 ]; then
         wrap_info=" x$wrap_count"

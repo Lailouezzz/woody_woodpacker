@@ -30,6 +30,7 @@ typedef struct __attribute__((packed)) {
 	uint32_t	bss_ranges_ptr;  /**< BSS ranges array vaddr. */
 	uint32_t	bss_ranges_len;  /**< Number of BSS ranges. */
 	int16_t		interp_idx;      /**< PHT index of the PT_INTERP, -1 if no interp */
+	uint8_t		key[16];         /**< XTEA key */
 }	t_stub_32_data;
 
 #endif

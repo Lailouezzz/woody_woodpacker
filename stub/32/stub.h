@@ -34,13 +34,15 @@ extern t_stub_32_data	g_stub_data;
  * @param ranges_len Number of protected ranges.
  * @param bss_ranges_ptr Array of BSS ranges (unmapped memory).
  * @param bss_ranges_len Number of BSS ranges.
+ * @param key XTEA key.
  */
 void	decrypt(
 			uintptr_t base,
 			t_range *protected_ranges,
 			uint64_t ranges_len,
 			t_range *bss_ranges_ptr,
-			uint64_t bss_ranges_len);
+			uint64_t bss_ranges_len,
+			const char *key);
 
 bool	elf_load(
 			const char *path,

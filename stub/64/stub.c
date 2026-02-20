@@ -57,7 +57,8 @@ void *stub_main(void *stack)
 	g_stub_data.bss_ranges_ptr = (uintptr_t)(g_stub_data.bss_ranges_ptr + _base);
 	decrypt((uint64_t)_base,
 		(t_range *)g_stub_data.ranges_ptr, g_stub_data.ranges_len,
-		(t_range *)g_stub_data.bss_ranges_ptr, g_stub_data.bss_ranges_len);
+		(t_range *)g_stub_data.bss_ranges_ptr, g_stub_data.bss_ranges_len,
+		(const char *)g_stub_data.key);
 	auxv = _auxv_from_stack(stack);
 	if (auxv == nullptr)
 		return (g_stub_data.entry_point + _base);
@@ -71,7 +72,8 @@ void *stub_main(void *stack)
 		elf_load(interp_path, &interp_base, &interp_entry);
 		_fix_auxv(auxv, interp_base);
 		return ((char *)interp_base + (uintptr_t)interp_entry);
-	}
+	} else
+		_fix_auxv(auxv, nullptr);
 
 	return (g_stub_data.entry_point + _base);
 }
@@ -116,7 +118,7 @@ static Elf64_Phdr	*_phdr_from_auxv(
 		}
 		++auxv;
 	}
-	return (NULL);
+	return (nullptr);
 }
 
 static void			_fix_auxv(

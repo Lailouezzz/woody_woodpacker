@@ -15,9 +15,11 @@ ASMS = $(wildcard $(SRCDIR)/*.S)
 BINS_64_PIE     = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_64_pie,$(SRCS))
 BINS_64_NOPIE   = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_64_nopie,$(SRCS))
 BINS_64_STATIC  = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_64_static,$(SRCS))
+BINS_64_STATIC  = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_64_static_pie,$(SRCS))
 BINS_32_PIE     = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_32_pie,$(SRCS))
 BINS_32_NOPIE   = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_32_nopie,$(SRCS))
 BINS_32_STATIC  = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_32_static,$(SRCS))
+BINS_32_STATIC  = $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%_32_static_pie,$(SRCS))
 
 # Assembly programs (64-bit only for now)
 BINS_ASM_64 = $(patsubst $(SRCDIR)/%.S,$(BINDIR)/%_asm64,$(ASMS))
@@ -42,6 +44,10 @@ $(BINDIR)/%_64_nopie: $(SRCDIR)/%.c | $(BINDIR)
 $(BINDIR)/%_64_static: $(SRCDIR)/%.c | $(BINDIR)
 	$(CC64) $(CFLAGS) -static -o $@ $< $(LDFLAGS) 2>/dev/null || touch $@
 
+# 64-bit static
+$(BINDIR)/%_64_static_pie: $(SRCDIR)/%.c | $(BINDIR)
+	$(CC64) $(CFLAGS) -static-pie -o $@ $< $(LDFLAGS) 2>/dev/null || touch $@
+
 # 32-bit PIE
 $(BINDIR)/%_32_pie: $(SRCDIR)/%.c | $(BINDIR)
 	$(CC32) $(CFLAGS) -pie -fPIE -o $@ $< $(LDFLAGS) 2>/dev/null || touch $@
@@ -53,6 +59,10 @@ $(BINDIR)/%_32_nopie: $(SRCDIR)/%.c | $(BINDIR)
 # 32-bit static
 $(BINDIR)/%_32_static: $(SRCDIR)/%.c | $(BINDIR)
 	$(CC32) $(CFLAGS) -static -o $@ $< $(LDFLAGS) 2>/dev/null || touch $@
+
+# 32-bit static
+$(BINDIR)/%_32_static_pie: $(SRCDIR)/%.c | $(BINDIR)
+	$(CC32) $(CFLAGS) -static-pie -o $@ $< $(LDFLAGS) 2>/dev/null || touch $@
 
 # 64-bit assembly
 $(BINDIR)/%_asm64: $(SRCDIR)/%.S | $(BINDIR)

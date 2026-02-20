@@ -320,6 +320,13 @@ main() {
     done
     echo ""
 
+    echo -e "${YELLOW}static-PIE:${NC}"
+    for bin in "$BINDIR"/*_64_static_pie; do
+        [ -f "$bin" ] || continue
+        run_test "64→64 staticPIE/$(basename "${bin%_64_static_pie}")" "$bin" "$PACKER64" 0
+    done
+    echo ""
+
     echo -e "${YELLOW}ASM:${NC}"
     for bin in "$BINDIR"/*_asm64; do
         [ -f "$bin" ] || continue
@@ -352,6 +359,13 @@ main() {
     done
     echo ""
 
+    echo -e "${YELLOW}static-PIE:${NC}"
+    for bin in "$BINDIR"/*_32_static_pie; do
+        [ -f "$bin" ] || continue
+        run_test "64→32 staticPIE/$(basename "${bin%_32_static_pie}")" "$bin" "$PACKER64" 0
+    done
+    echo ""
+
     # ===== 32-bit Packer Tests =====
     if [ -f "$PACKER32" ]; then
         echo -e "${BLUE}─── 32-bit Packer on 32-bit Binaries ───${NC}"
@@ -378,6 +392,13 @@ main() {
         done
         echo ""
 
+        echo -e "${YELLOW}static-PIE:${NC}"
+        for bin in "$BINDIR"/*_32_static_pie; do
+            [ -f "$bin" ] || continue
+            run_test "32→32 staticPIE/$(basename "${bin%_32_static_pie}")" "$bin" "$PACKER32" 0
+        done
+        echo ""
+
         # 32-bit packer on 64-bit (should work - packer embeds both stubs)
         echo -e "${BLUE}─── 32-bit Packer on 64-bit Binaries ───${NC}"
         echo ""
@@ -400,6 +421,13 @@ main() {
         for bin in "$BINDIR"/*_64_static; do
             [ -f "$bin" ] || continue
             run_test "32→64 static/$(basename "${bin%_64_static}")" "$bin" "$PACKER32" 0
+        done
+        echo ""
+
+        echo -e "${YELLOW}static-PIE:${NC}"
+        for bin in "$BINDIR"/*_64_static_pie; do
+            [ -f "$bin" ] || continue
+            run_test "32→64 staticPIE/$(basename "${bin%_64_static_pie}")" "$bin" "$PACKER32" 0
         done
         echo ""
     else

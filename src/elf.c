@@ -153,6 +153,7 @@ int		elf_append_loadable_data_and_locate(
 		return (EXIT_FAILURE);
 	s->data = new_data;
 
+	memset(&((uint8_t *)s->data)[s->size], 0, padding);
 	memcpy(&((uint8_t *)s->data)[s->size + padding], data, size);
 
 	data_vaddr = ALIGN_UP(_get_next_available_vaddr(s) + 1, align);

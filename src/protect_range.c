@@ -62,10 +62,7 @@ void	range_aggregate(
 			) {
 	if (ranges->len == 0)
 		return ;
-	verbose("sorting ranges...");
 	quicksort(ranges->data, sizeof(*ranges->data), ranges->len, _range_cmp);
-	verbose("done !\n");
-	verbose("aggregates ranges...");
 	for (size_t k = 0; k < ranges->len - 1; ++k) {
 		const off_t	last_off = ranges->data[k].off + ranges->data[k].len;
 		const off_t	next_last_off = ranges->data[k + 1].off + ranges->data[k + 1].len;
@@ -76,7 +73,6 @@ void	range_aggregate(
 			--k;
 		}
 	}
-	verbose("done !\n");
 }
 
 // ---

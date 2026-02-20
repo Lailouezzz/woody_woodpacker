@@ -227,7 +227,7 @@ static uint64_t	_get_next_bss_off(const t_ranges *bss_ranges,
 		vaddr = bss_ranges->data[k].off + base;
 		++k;
 	}
-	if (vaddr < start_vaddr)
+	if (vaddr <= start_vaddr)
 		return 0;
 	return vaddr;
 }
@@ -257,10 +257,10 @@ static void	_decrypt_mapping(const t_ranges *ranges, uintptr_t start_vaddr,
 		xtea_decrypt((void *)(uintptr_t)begin_vaddr, size,
 			(const uint32_t *)"1234567812345678");
 	}
-	// After the last range
-	auto const begin_vaddr = MAX(start_vaddr, ALIGN_UP(ranges->data[ranges->len - 1].off + ranges->data[ranges->len - 1].len, 8) + start_vaddr - off);
-	if (begin_vaddr >= end_vaddr)
-		return ;
-	xtea_encrypt((void *)(uintptr_t)begin_vaddr,
-		end_vaddr - begin_vaddr + 1, (const uint32_t *)"1234567812345678");
+	// After the last range TODO: HANDLE FILE SIZE CHANGE AFTER PACKING
+	// auto const begin_vaddr = MAX(start_vaddr, ALIGN_UP(ranges->data[ranges->len - 1].off + ranges->data[ranges->len - 1].len, 8) + start_vaddr - off);
+	// if (begin_vaddr >= end_vaddr)
+	// 	return ;
+	// xtea_encrypt((void *)(uintptr_t)begin_vaddr,
+	// 	end_vaddr - begin_vaddr + 1, (const uint32_t *)"1234567812345678");
 }
